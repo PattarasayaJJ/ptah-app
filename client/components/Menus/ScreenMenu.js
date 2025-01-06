@@ -17,6 +17,10 @@ import { useNavigation } from '@react-navigation/native'
 import Allblog from '../../screens/Allblog.jsx'
 import EditPostScreen from '../../screens/EditPost.jsx'
 import PostDetails from '../../screens/PostDetails.jsx'
+import Therapy from '../../screens/Therapy.jsx'
+import TherapyFeedback from '../../screens/TherapyFeedback.jsx'
+import Resultstherapy from '../../screens/Resultstherapy.jsx'
+import CalendarScreen from "../../screens/CalendarScreen.jsx"
 
 
 const ScreenMenu = () => {
@@ -120,6 +124,54 @@ const ScreenMenu = () => {
 <Stack.Screen 
     name="PostDetails" 
     component={PostDetails}  
+    options={{
+        headerBackTitle:"Back",
+        headerTitle: (props) => <HeaderLogo {...props} />,
+        headerTitleAlign: 'center',
+    }} 
+    />
+    <Stack.Screen 
+    name="Therapy" 
+    component={Therapy}  
+    options={{
+        headerBackTitle:"Back",
+        headerTitle: (props) => <HeaderLogo {...props} />,
+        headerTitleAlign: 'center',
+    }} 
+
+
+    />
+
+
+
+
+<Stack.Screen 
+    name="TherapyFeedback" 
+    component={TherapyFeedback}  
+    options={{
+        headerBackTitle:"Back",
+        headerTitle: (props) => <HeaderLogo {...props} />,
+        headerTitleAlign: 'center',
+    }} 
+    />
+
+<Stack.Screen 
+    name="Resultstherapy" 
+    component={Resultstherapy}  
+    options={{
+        headerBackTitle:"Back",
+        headerTitle: (props) => <HeaderLogo {...props} />,
+        headerTitleAlign: 'center',
+    }} 
+    />
+
+
+
+    
+
+    <Stack.Screen 
+    name="CalendarScreen" 
+    component={CalendarScreen}  
     options={{
         headerBackTitle:"Back",
         headerTitle: (props) => <HeaderLogo {...props} />,
