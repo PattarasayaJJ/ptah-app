@@ -1,12 +1,12 @@
 // server.js
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const colors = require('colors');
-const morgan = require('morgan');
-const connectDB = require('./config/db');
-const http = require('http');
-const socketIo = require('socket.io');
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const colors = require("colors");
+const morgan = require("morgan");
+const connectDB = require("./config/db");
+const http = require("http");
+const socketIo = require("socket.io");
 
 // dotenv
 dotenv.config();
@@ -26,23 +26,25 @@ const io = socketIo(server);
 // Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
 // Routes
-app.use('/api/v1/auth', require('./routes/userRoutes'));
-app.use('/api/v1/post', require('./routes/postRoutes'));
+app.use("/api/v1/auth", require("./routes/userRoutes"));
+app.use("/api/v1/post", require("./routes/postRoutes"));
+app.use("/api/v1/question", require("./routes/questionRoutes"));
+app.use("/api/v1/answer", require("./routes/answerRoutes"));
 
 // Socket.io connection
-io.on('connection', (socket) => {
-  console.log('A user connected');
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
   // Handle incoming messages
-  socket.on('add-comment', (comment) => {
-    io.emit('new-comment', comment);
+  socket.on("add-comment", (comment) => {
+    io.emit("new-comment", comment);
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
   });
 });
 
