@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { View, Platform, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { AuthContext } from "../../context/authContext";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import HeaderLogo from "../HeaderLogo";
@@ -10,6 +10,7 @@ import SurveyScreen from "./Survey";
 import SuccessCardScreen from "./SuccessCard";
 
 const Therapy = ({ navigation }) => {
+  const [authState] = useContext(AuthContext);
   const [questions, setQuestions] = useState([]);
   const [isSurvey, setIsSurvey] = useState(null);
 
@@ -20,9 +21,11 @@ const Therapy = ({ navigation }) => {
 
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem("isSurvey");
+      const value = await AsyncStorage.getItem(
+        `isSurvey_${authState.user._id}`
+      );
 
-      // await AsyncStorage.removeItem("isSurvey");
+      // await AsyncStorage.removeItem(`isSurvey_${}`);
       setIsSurvey(value != null || value === "yes" ? true : false);
     } catch (e) {
       // error reading value
@@ -45,7 +48,7 @@ const Therapy = ({ navigation }) => {
   // Callback to update `isSurvey`
   const updateSurveyStatus = async () => {
     try {
-      await AsyncStorage.setItem("isSurvey", "yes");
+      await AsyncStorage.setItem(`isSurvey_${authState.user._id}`, "yes");
       setIsSurvey(true);
     } catch (e) {
       console.log("error updating survey status", e);
