@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Alert, Image, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../context/authContext';
 
 const PostDetails = ({ route }) => {
   const { post } = route.params;
@@ -11,6 +12,8 @@ const PostDetails = ({ route }) => {
   const [comments, setComments] = useState(post.comments || []);
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [authState] = useContext(AuthContext);
+  const { user } = authState;
 
   useEffect(() => {
     const getUserData = async () => {
@@ -50,9 +53,6 @@ const PostDetails = ({ route }) => {
         ? `http://10.0.2.2:8080/api/v1/post/${post._id}/add-reply/${replyingTo}`
         : `http://10.0.2.2:8080/api/v1/post/add-comment/${post._id}`;
 
-      console.log('URL:', url);
-      console.log('Body:', { text: commentText });
-
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -81,7 +81,6 @@ const PostDetails = ({ route }) => {
   };
 
   const handleReply = (commentId) => {
-    console.log('Setting reply to comment ID:', commentId);
     setReplyingTo(commentId);
     setCommentText('');
   };
@@ -104,9 +103,14 @@ const PostDetails = ({ route }) => {
               <View style={styles.commentContent}>
                 <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.avatar} />
                 <View style={styles.commentTextContainer}>
-                  <Text style={styles.commentInfo}>
-                  โพสต์โดย: {post.postedBy?.name || comment.postedBy}
-                  </Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={styles.commentInfo}>
+                      ตอบกลับโดย: {user.name}
+                    </Text>
+                    <Text style={styles.commentDate}>
+                      {moment(comment.created).format('DD/MM/YYYY')}
+                    </Text>
+                  </View>
                   <Text style={styles.commentText}>{comment.text}</Text>
                   <TouchableOpacity onPress={() => handleReply(comment._id)} style={styles.replyButton}>
                     <Text style={styles.replyButtonText}>ตอบกลับ</Text>
@@ -114,13 +118,23 @@ const PostDetails = ({ route }) => {
                   {comment.replies &&
                     comment.replies.map((reply, replyIndex) => (
                       <View key={replyIndex} style={styles.reply}>
-                        <Text style={styles.replyInfo}>
-                          ตอบกลับโดย: {reply.postedBy.name || reply.postedBy}
-                        </Text>
-                        <Text style={styles.replyText}>{reply.text}</Text>
-                        <Text style={styles.commentDate}>
-                          วันที่: {moment(reply.created).format('DD/MM/YYYY')}
-                        </Text>
+                        <View style={styles.replyContent}>
+                          <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.avatar} />
+                          <View style={styles.replyTextContainer}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Text style={styles.replyInfo}>
+                                ตอบกลับโดย: {user.name}
+                              </Text>
+                              <Text style={styles.commentDate}>
+                                {moment(reply.created).format('DD/MM/YYYY')}
+                              </Text>
+                            </View>
+                            <Text style={styles.replyText}>{reply.text}</Text>
+                            <TouchableOpacity onPress={() => handleReply(comment._id)} style={styles.replyButton}>
+                              <Text style={styles.replyButtonText}>ตอบกลับ</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
                       </View>
                     ))}
                 </View>
@@ -155,7 +169,6 @@ const PostDetails = ({ route }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -188,55 +201,49 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontFamily: "Kanit"
   },
-  tag:{
+  tag: {
     color: '#87CEFA',
     marginTop: 10,
     marginBottom: 5,
-    fontFamily: "Kanit"
+    fontFamily: "Kanit",
+    
   },
   commentsTitle: {
     fontSize: 15,
     marginBottom: 5,
     color: '#404040',
-    marginTop:10
+    marginTop: 10
   },
   commentsContainer: {
     marginVertical: 10,
   },
   comment: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
   },
   commentContent: {
-    flexDirection: 'row',  // To position avatar and comment side by side
-    alignItems: 'flex-start',  // Align avatar and text at the top
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
   avatar: {
-    width: 50,  // Set avatar size
-    height: 50,
+    width: 45,
+    height: 45,
     borderRadius: 25,
-    marginRight: 10,  // Add space between avatar and comment text
+    marginRight: 10,
   },
   commentTextContainer: {
-    flex: 1,  // Allow comment text to take the remaining width
+    flex: 1,
   },
   commentText: {
     fontFamily: "Kanit",
-    color:"#404040",
+    color: "#404040",
   },
   commentInfo: {
     color: 'grey',
     fontSize: 13,
-    marginTop: 5,
     fontFamily: "Kanit",
-    marginBottom:5
-  },
-  commentFooter: {
-    flexDirection: 'row',  // Align date and reply button in a row
-    justifyContent: 'space-between',  // Push date and reply to opposite ends
-    marginTop: 5,
   },
   commentDate: {
     color: 'grey',
@@ -244,17 +251,25 @@ const styles = StyleSheet.create({
     fontFamily: "Kanit",
   },
   replyButton: {
-    marginLeft: 10,
+    alignSelf: 'flex-end',
+    marginTop: 5,
   },
   replyButtonText: {
     color: '#87CEFA',
     fontFamily: "Kanit"
   },
   reply: {
-    backgroundColor: '#E0E0E0',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 20,
+    marginVertical: 7,
+  },
+  replyContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  replyTextContainer: {
+    flex: 1,
   },
   replyText: {
     fontFamily: "Kanit"
@@ -262,12 +277,7 @@ const styles = StyleSheet.create({
   replyInfo: {
     color: 'grey',
     fontSize: 13,
-    marginBottom: 5,
-    fontFamily: "Kanit"
-  },
-  deleteButton: {
-    marginTop: 5,
-    alignSelf: 'flex-start',
+    fontFamily: "Kanit",
   },
   replyingToContainer: {
     flexDirection: 'row',
@@ -302,7 +312,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 1,
-    marginBottom:10
+    marginBottom: 10
   },
 });
 

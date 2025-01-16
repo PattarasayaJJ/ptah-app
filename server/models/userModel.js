@@ -1,32 +1,28 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    ID_card_number: {
-        type: String,
-        required: [true, "กรุณากรอกเลขบัตรประชาชน"],
-        trim: true,
-    },
-    password: {
-        type: String,
-        required: [true, "กรุณากรอกรหัสผ่าน"],
-       
-    },
-    name: {
-        type: String,
-    },
-    surename: {
-        type: String,
-    },
-    tel: {
-        type: String,
-    },
-    email: {
-        type: String,
-    },
+    username: { type: String, unique: true },
+    password: String,
+    email: { type: String, sparse: true },
+    tel: String,
+    name: String,
+    surname: String,
+    gender: String,
+    birthday: Date,
+    ID_card_number: String,
+    nationality: String,
+    Address: String,
+    deletedAt: { type: Date, default: null },
+    deleteExpiry:  { type: Date, default: null },
+    AdddataFirst: { type: Boolean, default: false },
+    physicalTherapy: { type: Boolean, default: false },
+    isEmailVerified: { type: Boolean, default: false }
+  },
   
-  
-},
-{ timestamps: true }
+  {
+    collection: "User",
+    timestamps: true,
+  }
 );
 
 // ระบุชื่อคอลเลคชันอย่างชัดเจนให้เป็น "User"

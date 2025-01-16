@@ -51,6 +51,9 @@ const getAllpostController = async (req, res) => {
   }
 };
 
+
+
+
 // Get User Posts
 const getUserPostsController = async (req, res) => {
   try {
@@ -217,33 +220,47 @@ const addReplyController = async (req, res) => {
     const { postId, commentId } = req.params;
     const { text } = req.body;
 
-    if (!text || !text.trim()) {
-      return res.status(400).json({ success: false, message: 'ต้องกรอกข้อความการตอบกลับ' });
+    if (!text.trim()) {
+      return res.status(400).send({ success: false, message: "ต้องกรอกข้อความการตอบกลับ" });
     }
 
     const post = await postModel.findById(postId);
     if (!post) {
-      return res.status(404).json({ success: false, message: 'ไม่พบโพสต์' });
+      return res.status(404).send({ success: false, message: "ไม่พบโพสต์" });
     }
 
     const comment = post.comments.find((c) => c._id.toString() === commentId);
     if (!comment) {
-      return res.status(404).json({ success: false, message: 'ไม่พบความคิดเห็น' });
+      return res.status(404).send({ success: false, message: "ไม่พบความคิดเห็น" });
     }
 
     comment.replies.push({
       text,
-      postedBy: req.auth._id,
+      postedBy: req.auth._id, // บันทึกไอดีของผู้ตอบกลับ
       created: Date.now(),
     });
 
     await post.save();
-    res.status(200).json({ success: true, message: 'เพิ่มการตอบกลับสำเร็จ', post });
+
+    const updatedPost = await postModel
+      .findById(postId)
+      .populate('comments.replies.postedBy', 'name email'); // populate หลังการบันทึก
+
+    res.status(200).send({
+      success: true,
+      message: "เพิ่มการตอบกลับสำเร็จ",
+      post: updatedPost,
+    });
   } catch (error) {
-    console.error('Error in addReplyController:', error.message);
-    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในเซิร์ฟเวอร์', error: error.message });
+    console.error("Error in addReplyController:", error);
+    res.status(500).send({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการตอบกลับ",
+      error: error.message,
+    });
   }
 };
+
 
 
 
@@ -258,4 +275,5 @@ module.exports = {
   addCommentController,
   deleteCommentController,
   addReplyController,
+  
 };
