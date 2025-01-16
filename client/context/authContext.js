@@ -31,8 +31,8 @@ const AuthProvider = ({ children }) => {
 
   //axios.defaults.baseURL = 'http://192.168.8.147:8080/api/v1';
 
-   axios.defaults.baseURL = 'http://10.0.2.2:8080/api/v1';
-    // axios.defaults.baseURL = "http://localhost:8080/api/v1";
+  //  axios.defaults.baseURL = 'http://10.0.2.2:8080/api/v1';
+  axios.defaults.baseURL = "http://localhost:8080/api/v1";
   return (
     <AuthContext.Provider value={[state, setState]}>
       {children}

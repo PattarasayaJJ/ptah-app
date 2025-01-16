@@ -31,7 +31,10 @@ const SuccessCardScreen = ({ navigation }) => {
         <View style={styles.questionContainer}>
           <Text style={styles.questionText}>{"มากายภาพบำบัดกันเถอะ!"}</Text>
         </View>
-        <TouchableOpacity style={styles.nextButton} onPress={() => {}}>
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={() => navigation.navigate("Step")}
+        >
           <Text style={styles.nextButtonText}>เริ่ม</Text>
         </TouchableOpacity>
       </View>

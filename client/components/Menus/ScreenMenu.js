@@ -18,6 +18,8 @@ import Allblog from "../../screens/Allblog.jsx";
 import EditPostScreen from "../../screens/EditPost.jsx";
 import PostDetails from "../../screens/PostDetails.jsx";
 import Therapy from "../../screens/Therapy";
+import StepScreen from "../../screens/Step";
+import StepDetailScreen from "../../screens/Step/Detail.jsx";
 import TherapyFeedback from "../../screens/TherapyFeedback.jsx";
 import Resultstherapy from "../../screens/Resultstherapy.jsx";
 import CalendarScreen from "../../screens/CalendarScreen.jsx";
@@ -129,6 +131,26 @@ const ScreenMenu = () => {
           <Stack.Screen
             name="Therapy"
             component={Therapy}
+            options={{
+              headerShown: false,
+              //   headerBackTitle: "Back",
+              //   headerTitle: (props) => <HeaderLogo {...props} />,
+              //   headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen
+            name="Step"
+            component={StepScreen}
+            options={{
+              headerShown: false,
+              //   headerBackTitle: "Back",
+              //   headerTitle: (props) => <HeaderLogo {...props} />,
+              //   headerTitleAlign: "center",
+            }}
+          />
+          <Stack.Screen
+            name="StepDetail"
+            component={StepDetailScreen}
             options={{
               headerShown: false,
               //   headerBackTitle: "Back",
