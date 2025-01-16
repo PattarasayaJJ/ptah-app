@@ -141,6 +141,7 @@ const ScreenMenu = () => {
             name="TherapyFeedback"
             component={TherapyFeedback}
             options={{
+              
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",

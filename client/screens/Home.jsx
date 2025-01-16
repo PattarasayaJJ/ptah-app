@@ -39,7 +39,7 @@ const Home = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         
-        <Text style={styles.hello}>สวัสดี {authState?.user.name} {authState?.user.surename}   </Text>
+        <Text style={styles.hello}>สวัสดี {authState?.user.name} {authState?.user.surname}   </Text>
         
        <Image source={require('../img/poster.png')} style={styles.img} />
 

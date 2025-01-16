@@ -29,10 +29,10 @@ const Account = () => {
                     }}
                 />
                 <View style={styles.textContainer}>
-                    <Text style={styles.username}>{authState?.user.name}  {authState?.user.surename}</Text>
+                    <Text style={styles.username}>{authState?.user.name}  {authState?.user.surname}</Text>
                     <Text style={styles.idcard}> เบอร์โทรศัพท์ : {authState?.user.tel} </Text>
-                    <Text style={styles.idcard}>รหัสบัตรประจำตัวประชาชน :  {authState?.user.ID_card_number}</Text>
-                    <Text style={styles.idcard}>แพทย์ผู้ดูแล พญ.สมพร เตโช</Text>
+                    <Text style={styles.idcard}> รหัสบัตรประจำตัวประชาชน :  {authState?.user.ID_card_number}</Text>
+                    <Text style={styles.idcard}> Email : {authState?.user.email}</Text>
 
                 </View>
             </View>
