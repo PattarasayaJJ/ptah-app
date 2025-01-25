@@ -5,7 +5,10 @@ const SubMissionsSchema = new mongoose.Schema({
   videoUrl: { type: String, required: true },
   photoUrl: { type: String, required: true },
   evaluate: { type: Boolean, default: false },
-  createdAt: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("SubMissions", SubMissionsSchema);

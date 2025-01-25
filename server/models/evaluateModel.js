@@ -4,6 +4,7 @@ const EvaluateSchema = new mongoose.Schema({
   userId: String,
   missionId: String,
   suggestion: String,
+  timeSpent: String,
   answers: [{ name: String, result: String }],
   created_at: {
     type: Date,

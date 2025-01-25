@@ -33,6 +33,7 @@ app.use("/api/v1/auth", require("./routes/userRoutes"));
 app.use("/api/v1/post", require("./routes/postRoutes"));
 app.use("/api/v1/question", require("./routes/questionRoutes"));
 app.use("/api/v1/answer", require("./routes/answerRoutes"));
+app.use("/api/v1/mission", require("./routes/missionRoute"));
 
 // Socket.io connection
 io.on("connection", (socket) => {
