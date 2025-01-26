@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,27 +9,29 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-
+import axios from "axios";
 import HeaderLogo from "../HeaderLogo";
 
 const StepScreen = ({ navigation }) => {
-  const steps = [
-    { id: 1, title: "เรียนรู้การจัดท่า\nในชีวิตประจำวัน", isFocus: true },
-    { id: 2, title: "เคลื่อนไหว\nข้อต่อแขน", isFocus: false, round: "0/2" },
-    { id: 3, title: "เคลื่อนไหว\nข้อต่อขา", isFocus: false, round: "0/2" },
-    {
-      id: 4,
-      title: "การบริหาร\nฝึกกล้ามเนื้อสะโพก",
-      isFocus: false,
-      round: "0/2",
-    },
-    {
-      id: 5,
-      title: "เคลื่อนย้ายจาก\nเตียงไปรถเข็น",
-      isFocus: false,
-      round: "0/2",
-    },
-  ];
+  const [steps, setSteps] = useState([]);
+
+  useEffect(() => {
+    handleGetMission();
+  }, []);
+
+  const handleGetMission = async () => {
+    try {
+      const response = await axios.get("/mission/get-all-mission");
+
+      if (response.status === 200) {
+        console.log("response", response.data);
+
+        setSteps(response.data.mission);
+      }
+    } catch (error) {
+      console.log("err call api get question", error);
+    }
+  };
 
   return (
     <LinearGradient
@@ -48,7 +50,7 @@ const StepScreen = ({ navigation }) => {
         </TouchableOpacity>
         <ScrollView contentContainerStyle={styles.container}>
           {steps.map((step, index) => (
-            <View key={step.id} style={styles.stepWrapper}>
+            <View key={step._id} style={styles.stepWrapper}>
               {/* เส้นเฉียง */}
               {index < steps.length - 1 && (
                 <View
@@ -61,7 +63,7 @@ const StepScreen = ({ navigation }) => {
               {/* วงกลม */}
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("StepDetail", { id: step.id })
+                  navigation.navigate("StepDetail", { id: step._id })
                 }
                 style={[
                   styles.stepContainer,
@@ -75,7 +77,7 @@ const StepScreen = ({ navigation }) => {
                       { textAlign: index % 2 === 0 ? "left" : "right" },
                     ]}
                   >
-                    ด่านที่ <Text style={{ fontSize: 28 }}> {step.id}</Text>
+                    ด่านที่ <Text style={{ fontSize: 28 }}> {step.no}</Text>
                   </Text>
                   <View
                     style={[
@@ -92,7 +94,7 @@ const StepScreen = ({ navigation }) => {
                         { color: step.isFocus ? "white" : "#0081a2" },
                       ]}
                     >
-                      {step.title}
+                      {step.name}
                     </Text>
                     {step.round && (
                       <Text

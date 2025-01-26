@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,17 +10,130 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Video } from "expo-av";
-
+import axios from "axios";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-
+import EvaluationModal from "../../components/EvaluationModal";
+import SuccessModal from "../../components/SuccessModal";
 import HeaderLogo from "../HeaderLogo";
 
 const { width, height } = Dimensions.get("window");
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const StepDetailScreen = ({ navigation, route }) => {
   const btn = ["วิดีโอ", "รูปภาพ"];
   const videoRef = useRef(null);
+  const [missionDetail, setMissionDetail] = useState({});
+  const [subMissionLength, setSubMissionLength] = useState(0);
+  const [maxSubMissionLength, setMaxSubMissionLength] = useState(0);
   const [isSelected, setIsSelected] = useState(0);
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(true);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isModalVisible2, setModalVisible2] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const [selectedLevel, setSelectedLevel] = useState(null);
+
+  useEffect(() => {
+    handleGetMissionDetail();
+  }, []);
+  useEffect(() => {
+    let timer = null;
+
+    if (isRunning) {
+      timer = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      clearInterval(timer);
+    }
+
+    return () => clearInterval(timer);
+  }, [isRunning]);
+
+  const handleGetMissionDetail = async () => {
+    try {
+      const response = await axios.get(
+        `/mission/get-mission/${route.params.id}`
+      );
+
+      if (response.status === 200) {
+        console.log("response", response.data);
+
+        setMissionDetail(response.data.data);
+        setMaxSubMissionLength(response.data.data.submissions.length);
+      }
+    } catch (error) {
+      console.log("err call api get question", error);
+    }
+  };
+
+  const handleConditionNext = () => {
+    if (maxSubMissionLength === subMissionLength + 1) {
+      if (missionDetail?.submissions[subMissionLength]?.evaluate) {
+        // call function send all evaluate
+        console.log("111");
+        // console.log("answers", answers);
+        toggleModal();
+      } else {
+        console.log("112");
+        navigation.goBack();
+      }
+    } else {
+      if (missionDetail?.submissions[subMissionLength]?.evaluate) {
+        // open pop up evaluate
+        console.log("113");
+        toggleModal();
+      } else {
+        console.log("114");
+        setSubMissionLength((prev) => prev + 1);
+      }
+    }
+  };
+
+  const toggleModal = () => {
+    setIsRunning(!isRunning);
+    setModalVisible(!isModalVisible);
+  };
+
+  // รับค่าระดับการประเมินจาก Modal
+  const handleSelectLevel = async (level) => {
+    console.log("ระดับที่เลือก:", level);
+    const newAnswers = [
+      ...answers,
+      { name: missionDetail.submissions[subMissionLength].name, result: level },
+    ];
+    setAnswers(newAnswers);
+    console.log("newAnswers:", newAnswers);
+    if (maxSubMissionLength !== subMissionLength + 1) {
+      setSubMissionLength((prev) => prev + 1);
+    } else {
+      await delay(500);
+      setModalVisible2(true);
+    }
+  };
+
+  const onCloseSuccess = () => {
+    console.log("sdsdsdsds");
+    setModalVisible2(false);
+    navigation.navigate("Resultstherapy", {
+      answers,
+      time,
+      missionId: route.params.id,
+    });
+  };
+
+  const formatTime = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(
+      2,
+      "0"
+    )}:${String(secs).padStart(2, "0")}`;
+  };
+
   return (
     <LinearGradient
       colors={["#FFFFFF", "#baefff"]} // ไล่สีจากฟ้าจางไปขาว
@@ -36,11 +149,29 @@ const StepDetailScreen = ({ navigation, route }) => {
         >
           <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
         </TouchableOpacity>
+        {missionDetail.submissions &&
+          missionDetail?.submissions[subMissionLength]?.evaluate && (
+            <View style={{ alignItems: "flex-end", marginRight: 10 }}>
+              <Text style={styles.stepNumber}>
+                <FontAwesome5 name="stopwatch" color="#6bdbfc" size={18} />
+                <Text style={{ fontSize: 18, color: "#6bdbfc" }}>
+                  {" "}
+                  {formatTime(time)}
+                  {" น."}
+                </Text>
+              </Text>
+            </View>
+          )}
         <View style={styles.container}>
           <Text style={styles.stepNumber}>
-            ด่านที่ <Text style={{ fontSize: 28 }}> {route.params.id}</Text>
+            ด่านที่
+            <Text style={{ fontSize: 28 }}> {missionDetail?.mission?.no}</Text>
           </Text>
-          <Text style={styles.stepNumber}>ท่านอนตะแคงทับข้างดี</Text>
+          <Text style={styles.stepNumber}>
+            {missionDetail.submissions
+              ? missionDetail.submissions[subMissionLength].name
+              : ""}
+          </Text>
           <View style={{ flexDirection: "row" }}>
             {btn.map((value, idx) => (
               <TouchableOpacity
@@ -69,7 +200,9 @@ const StepDetailScreen = ({ navigation, route }) => {
                 ref={videoRef}
                 style={styles.video}
                 source={{
-                  uri: "https://firebasestorage.googleapis.com/v0/b/ptahproject-3a7d3.appspot.com/o/postures%2F1%2Fvideos%2F0_IMG_6834.MOV?alt=media&token=714f168f-751e-4463-a116-d1055093382e", // Replace with your video URL
+                  uri: missionDetail.submissions
+                    ? missionDetail?.submissions[subMissionLength]?.videoUrl
+                    : "",
                 }}
                 useNativeControls // Enables play/pause and other controls
                 resizeMode="cover" // Adjusts how the video is scaled
@@ -79,7 +212,9 @@ const StepDetailScreen = ({ navigation, route }) => {
               <Image
                 style={[styles.video, { resizeMode: "contain" }]}
                 source={{
-                  uri: "https://firebasestorage.googleapis.com/v0/b/ptahproject-3a7d3.appspot.com/o/postures%2F676921a6b28f4d2dfc42614a%2Fimages%2F0_%E0%B8%94%E0%B9%88%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%881.1%20%E0%B8%97%E0%B9%88%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%99%E0%B8%AB%E0%B8%87%E0%B8%B2%E0%B8%A2.png?alt=media&token=94a7c851-0e72-42ea-8745-2d9fb90745c9",
+                  uri: missionDetail.submissions
+                    ? missionDetail?.submissions[subMissionLength]?.photoUrl
+                    : "",
                 }}
               />
             )}
@@ -90,7 +225,7 @@ const StepDetailScreen = ({ navigation, route }) => {
         >
           <TouchableOpacity
             style={styles.nextButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => handleConditionNext()}
           >
             <View></View>
             <Text style={styles.nextButtonText}>ต่อไป</Text>
@@ -98,6 +233,19 @@ const StepDetailScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </View>
+      <EvaluationModal
+        isVisible={isModalVisible}
+        onClose={toggleModal}
+        onSelectLevel={handleSelectLevel}
+        missionDetail={missionDetail}
+        subMissionLength={subMissionLength}
+        time={time}
+      />
+      <SuccessModal
+        isVisible={isModalVisible2}
+        onCloseSuccess={() => onCloseSuccess()}
+        time={time}
+      />
     </LinearGradient>
   );
 };
@@ -111,7 +259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   container: {
-    paddingVertical: 80,
+    paddingVertical: 10,
     alignItems: "center",
   },
   backButton: {

@@ -163,7 +163,6 @@ const ScreenMenu = () => {
             name="TherapyFeedback"
             component={TherapyFeedback}
             options={{
-              
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
@@ -174,9 +173,10 @@ const ScreenMenu = () => {
             name="Resultstherapy"
             component={Resultstherapy}
             options={{
-              headerBackTitle: "Back",
-              headerTitle: (props) => <HeaderLogo {...props} />,
-              headerTitleAlign: "center",
+              headerShown: false,
+              // headerBackTitle: "Back",
+              // headerTitle: (props) => <HeaderLogo {...props} />,
+              // headerTitleAlign: "center",
             }}
           />
 

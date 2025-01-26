@@ -25,7 +25,6 @@ const Therapy = ({ navigation }) => {
         `isSurvey_${authState.user._id}`
       );
 
-      // await AsyncStorage.removeItem(`isSurvey_${}`);
       setIsSurvey(value != null || value === "yes" ? true : false);
     } catch (e) {
       // error reading value

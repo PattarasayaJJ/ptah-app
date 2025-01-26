@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const UserModel = require("../models/userModel");
 const MissionModel = require("../models/missionModel");
 const SubMissionModel = require("../models/subMissionModel");
 const EvaluateModel = require("../models/evaluateModel");
@@ -39,18 +40,18 @@ const getAllMissionController = async (req, res) => {
   try {
     console.log("req", req);
 
-    const answer = await MissionModel.find();
+    const mission = await MissionModel.find();
 
     res.status(200).send({
       success: true,
-      message: "All answer retrieved successfully",
-      answer,
+      message: "All mission retrieved successfully",
+      mission,
     });
   } catch (error) {
-    console.error("Error in get all answer:", error);
+    console.error("Error in get all mission:", error);
     res.status(500).send({
       success: false,
-      message: "Error in get all answer API",
+      message: "Error in get all mission API",
       error,
     });
   }
@@ -171,7 +172,7 @@ const getSubmissionDataController = async (req, res) => {
       submissions.push(data || null);
       // return data || null; // ถ้าไม่เจอคืนค่า null
     });
-    await delay(1000);
+    await delay(200);
 
     // ส่งผลลัพธ์กลับ
     res.status(200).send({
@@ -210,10 +211,18 @@ const snedEvaluateController = async (req, res) => {
       timeSpent,
     });
 
+    // เพิ่มค่า stars ของ user +1
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { $inc: { stars: 1 } }, // เพิ่มค่า stars +1
+      { new: true } // คืนค่าผู้ใช้หลังจากอัปเดต
+    );
+
     res.status(201).send({
       success: true,
       message: "evaluate created successfully",
       evaluate,
+      user,
     });
   } catch (error) {
     console.error("Error in create evaluate:", error);

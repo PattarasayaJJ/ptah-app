@@ -11,11 +11,13 @@
   "dependencies": {
     "@expo-google-fonts/kanit": "^0.2.3",
     "@react-native-async-storage/async-storage": "^1.21.0",
+    "@react-native-community/slider": "^4.5.5",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.9.24",
     "@react-navigation/stack": "^6.3.26",
     "axios": "^1.6.7",
     "expo": "~50.0.11",
+    "expo-av": "~13.10.6",
     "expo-font": "~11.10.3",
     "expo-linear-gradient": "~12.7.2",
     "expo-status-bar": "~1.11.1",
@@ -28,13 +30,13 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-localization": "^2.3.2",
     "react-native-localize": "^3.0.6",
+    "react-native-modal": "^13.0.1",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
     "react-native-vector-icons": "^10.0.3",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
-    "socket.io-parser": "^4.2.4",
-    "expo-av": "~13.10.6"
+    "socket.io-parser": "^4.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
