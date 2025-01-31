@@ -58,8 +58,6 @@ const createMissionController = async (req, res) => {
 // };
 const getAllMissionController = async (req, res) => {
   try {
-    console.log("req", req);
-
     const missions = await MissionModel.find();
 
     // ตรวจสอบแต่ละ mission ที่มี isEvaluate === true
@@ -276,57 +274,58 @@ const snedEvaluateController = async (req, res) => {
 
 const addStarToUserController = async (req, res) => {
   try {
-    console.log("Checking if user qualifies for stars...");
+    console.log("🔍 Checking if user qualifies for stars...");
 
-    const { userId } = req.body;
-    if (!userId) {
+    const { _id } = req.auth;
+    if (!_id) {
       return res.status(400).send({
         success: false,
-        message: "User ID is required",
+        message: "❌ User ID is required",
       });
     }
 
-    // ดึง missions ที่มี isEvaluate === true
-    const missionsToEvaluate = await MissionModel.find({ isEvaluate: true });
+    // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
+    const user = await UserModel.findById(_id);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "❌ User not found",
+      });
+    }
 
-    // ตรวจสอบว่าทุก mission ที่ต้องมีการประเมินได้รับการประเมินวันนี้หรือไม่
-    const allEvaluatedToday = missionsToEvaluate.every(
-      (mission) => mission.isEvaluatedToday === 1
+    // เช็คว่าวันที่ล่าสุดที่ได้รับดาวตรงกับวันนี้หรือไม่
+    const lastStarredDate = user.lastStarredAt
+      ? user.lastStarredAt.toISOString().split("T")[0]
+      : null;
+    const todayDate = new Date().toISOString().split("T")[0];
+
+    if (lastStarredDate === todayDate) {
+      return res.status(400).send({
+        success: false,
+        message: "❌ User has already received a star today!",
+      });
+    }
+
+    // ✅ ให้ดาว +1 และอัปเดต lastStarredAt เป็นวันนี้
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      _id,
+      {
+        $inc: { stars: 1 }, // เพิ่มค่า stars +1
+        $set: { lastStarredAt: new Date() }, // อัปเดตวันล่าสุดที่ให้ดาว
+      },
+      { new: true } // คืนค่าผู้ใช้ที่อัปเดตกลับมา
     );
 
-    if (allEvaluatedToday) {
-      // อัปเดตดาวของ User
-      const user = await UserModel.findById(userId);
-      if (!user) {
-        return res.status(404).send({
-          success: false,
-          message: "User not found",
-        });
-      }
-
-      // เพิ่มค่า stars ของ user +1
-      const updateUser = await UserModel.findByIdAndUpdate(
-        userId,
-        { $inc: { stars: 1 } }, // เพิ่มค่า stars +1
-        { new: true } // คืนค่าผู้ใช้หลังจากอัปเดต
-      );
-
-      return res.status(200).send({
-        success: true,
-        message: "User received a star!",
-        updateUser,
-      });
-    }
-
-    res.status(400).send({
-      success: false,
-      message: "Not all missions have been evaluated today",
+    return res.status(200).send({
+      success: true,
+      message: "⭐ User received a star!",
+      updatedUser,
     });
   } catch (error) {
-    console.error("Error in addStarToUserController:", error);
-    res.status(500).send({
+    console.error("❌ Error in addStarToUserController:", error);
+    return res.status(500).send({
       success: false,
-      message: "Error in adding stars to user",
+      message: "❌ Error in adding stars to user",
       error,
     });
   }

@@ -20,12 +20,7 @@ router.get("/get-all-mission", requireSignIn, getAllMissionController);
 router.post("/create-sub-mission", requireSignIn, createSubMissionController);
 router.put("/:id/submission", requireSignIn, updateSubmissionController);
 router.get("/get-mission/:id", requireSignIn, getSubmissionDataController);
-router.post(
-  "/:id/evaluate",
-  requireSignIn,
-  checkDailyLimit,
-  snedEvaluateController
-);
+router.post("/:id/evaluate", requireSignIn, snedEvaluateController);
 router.get(
   "/check/daily-mission/add-star",
   requireSignIn,

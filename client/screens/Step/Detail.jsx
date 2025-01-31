@@ -36,7 +36,7 @@ const StepDetailScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     handleGetMissionDetail();
-  }, []);
+  }, [route.params.id]);
   useEffect(() => {
     let timer = null;
 
@@ -58,10 +58,9 @@ const StepDetailScreen = ({ navigation, route }) => {
       );
 
       if (response.status === 200) {
-        console.log("response", response.data);
-
         setMissionDetail(response.data.data);
         setMaxSubMissionLength(response.data.data.submissions.length);
+        setIsRunning(response.data.data.mission.isEvaluate);
       }
     } catch (error) {
       console.log("err call api get question", error);
@@ -72,28 +71,36 @@ const StepDetailScreen = ({ navigation, route }) => {
     if (maxSubMissionLength === subMissionLength + 1) {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
         // call function send all evaluate
-        console.log("111");
+
         // console.log("answers", answers);
         toggleModal();
       } else {
-        console.log("112");
-        navigation.goBack();
+        let missionsToEvaluate = route.params.missionsToEvaluate;
+        const id = missionsToEvaluate.shift();
+        // navigation.goBack();
+        // navigation.navigate("StepDetail", {
+        //   id: id,
+        //   missionsToEvaluate,
+        // });
+        navigation.setParams({
+          id: id,
+          missionsToEvaluate,
+        });
       }
     } else {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
         // open pop up evaluate
-        console.log("113");
+
         toggleModal();
       } else {
-        console.log("114");
         setSubMissionLength((prev) => prev + 1);
       }
     }
   };
 
   const toggleModal = () => {
-    setIsRunning(!isRunning);
-    setModalVisible(!isModalVisible);
+    setIsRunning((perv) => (perv ? false : true));
+    setModalVisible((perv) => (perv ? false : true));
   };
 
   // รับค่าระดับการประเมินจาก Modal
@@ -104,22 +111,23 @@ const StepDetailScreen = ({ navigation, route }) => {
       { name: missionDetail.submissions[subMissionLength].name, result: level },
     ];
     setAnswers(newAnswers);
-    console.log("newAnswers:", newAnswers);
+
     if (maxSubMissionLength !== subMissionLength + 1) {
       setSubMissionLength((prev) => prev + 1);
     } else {
       await delay(500);
+      setIsRunning((perv) => (perv ? false : true));
       setModalVisible2(true);
     }
   };
 
   const onCloseSuccess = () => {
-    console.log("sdsdsdsds");
     setModalVisible2(false);
     navigation.navigate("Resultstherapy", {
       answers,
       time,
       missionId: route.params.id,
+      missionsToEvaluate: route.params.missionsToEvaluate,
     });
   };
 

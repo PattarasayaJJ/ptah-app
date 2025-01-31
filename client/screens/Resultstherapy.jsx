@@ -30,7 +30,7 @@ const Resultstherapy = ({ navigation, route }) => {
 
   useEffect(() => {
     // handleGetMission();
-    console.log("route", route.params);
+
     setexerciseResults(
       route.params?.answers !== undefined ? route.params.answers : []
     );
@@ -86,11 +86,20 @@ const Resultstherapy = ({ navigation, route }) => {
         `/mission/${route.params.id}/evaluate`,
         data
       );
-      console.log("data", data);
-      console.log("response", response);
 
       if (response.status === 201) {
         setModalVisible(true);
+        if (route.params.missionsToEvaluate.length === 0) {
+          navigation.navigate("Step");
+        } else {
+          let missionsToEvaluate = route.params.missionsToEvaluate;
+          const id = missionsToEvaluate.shift();
+          // navigation.goBack();
+          navigation.navigate("StepDetail", {
+            id: id,
+            missionsToEvaluate,
+          });
+        }
       }
     } catch (error) {
       console.log("err", error);

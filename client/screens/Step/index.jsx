@@ -10,10 +10,12 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import axios from "axios";
+import StarModal from "../../components/StarModal";
 import HeaderLogo from "../HeaderLogo";
 
 const StepScreen = ({ navigation }) => {
   const [steps, setSteps] = useState([]);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     handleGetMission();
@@ -24,13 +26,59 @@ const StepScreen = ({ navigation }) => {
       const response = await axios.get("/mission/get-all-mission");
 
       if (response.status === 200) {
-        console.log("response", response.data);
-
-        setSteps(response.data.mission);
+        setSteps(response.data.missions);
+        checkAllEvaluates(response.data.missions);
       }
     } catch (error) {
       console.log("err call api get question", error);
     }
+  };
+
+  const checkAllEvaluates = async (missions) => {
+    // กรองเฉพาะ mission ที่ต้องประเมิน (isEvaluate === true)
+    const missionsToEvaluate = missions.filter(
+      (mission) => mission.isEvaluate === true
+    );
+
+    // ตรวจสอบว่าทุก mission ที่ต้องประเมิน ถูกประเมินแล้ว (`isEvaluatedToday === 1`)
+    const allEvaluated = missionsToEvaluate.every(
+      (mission) => mission.isEvaluatedToday === 1
+    );
+
+    if (allEvaluated) {
+      console.log("✅ ทุก mission ที่ต้องประเมินถูกประเมินแล้ว! เรียก API...");
+
+      try {
+        // เรียก API
+        const response = await axios.get(
+          "/mission/check/daily-mission/add-star"
+        );
+
+        if (response.status === 200) {
+          setModalVisible(true);
+        }
+      } catch (error) {
+        console.log("❌ API call failed:", error);
+      }
+    } else {
+      console.log("⚠️ ยังมี mission ที่ไม่ได้ถูกประเมินครบถ้วน");
+    }
+  };
+
+  const handleSelectMission = (selectedMissionId) => {
+    // กรองเฉพาะ `_id` ของ mission ที่ `isEvaluatedToday = 0`
+    let missionsToEvaluate = steps
+      .filter((mission) => mission.isEvaluatedToday === 0)
+      .map((mission) => mission._id);
+    missionsToEvaluate = missionsToEvaluate.filter(
+      (missionId) => missionId !== selectedMissionId
+    );
+
+    // นำทางไปยังหน้าถัดไป พร้อมส่ง `_id` ของ mission ที่ถูกเลือกและ `_id` ของรายการที่ต้องประเมิน
+    navigation.navigate("StepDetail", {
+      id: selectedMissionId,
+      missionsToEvaluate,
+    });
   };
 
   return (
@@ -49,70 +97,76 @@ const StepScreen = ({ navigation }) => {
           <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
         </TouchableOpacity>
         <ScrollView contentContainerStyle={styles.container}>
-          {steps.map((step, index) => (
-            <View key={step._id} style={styles.stepWrapper}>
-              {/* เส้นเฉียง */}
-              {index < steps.length - 1 && (
-                <View
-                  style={[
-                    styles.diagonalLine,
-                    index % 2 === 0 ? styles.lineLeft : styles.lineRight,
-                  ]}
-                />
-              )}
-              {/* วงกลม */}
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("StepDetail", { id: step._id })
-                }
-                style={[
-                  styles.stepContainer,
-                  index % 2 === 0 ? styles.stepRight : styles.stepLeft,
-                ]}
-              >
-                <View>
-                  <Text
-                    style={[
-                      styles.stepNumber,
-                      { textAlign: index % 2 === 0 ? "left" : "right" },
-                    ]}
-                  >
-                    ด่านที่ <Text style={{ fontSize: 28 }}> {step.no}</Text>
-                  </Text>
+          {steps?.length > 0 &&
+            steps.map((step, index) => (
+              <View key={step._id} style={styles.stepWrapper}>
+                {/* เส้นเฉียง */}
+                {index < steps.length - 1 && (
                   <View
                     style={[
-                      styles.circle,
-                      {
-                        backgroundColor: step.isFocus ? "#64dafc" : "white",
-                        borderColor: step.isFocus ? "white" : "#64dafc",
-                      },
+                      styles.diagonalLine,
+                      index % 2 === 0 ? styles.lineLeft : styles.lineRight,
                     ]}
-                  >
+                  />
+                )}
+                {/* วงกลม */}
+                <TouchableOpacity
+                  disabled={step.isEvaluatedToday === 1}
+                  onPress={() => handleSelectMission(step._id)}
+                  style={[
+                    styles.stepContainer,
+                    index % 2 === 0 ? styles.stepRight : styles.stepLeft,
+                  ]}
+                >
+                  <View>
                     <Text
                       style={[
-                        styles.stepTitle,
-                        { color: step.isFocus ? "white" : "#0081a2" },
+                        styles.stepNumber,
+                        { textAlign: index % 2 === 0 ? "left" : "right" },
                       ]}
                     >
-                      {step.name}
+                      ด่านที่ <Text style={{ fontSize: 28 }}> {step.no}</Text>
                     </Text>
-                    {step.round && (
+                    <View
+                      style={[
+                        styles.circle,
+                        {
+                          backgroundColor: step.isFocus ? "#64dafc" : "white",
+                          borderColor: step.isFocus ? "white" : "#64dafc",
+                        },
+                      ]}
+                    >
                       <Text
-                        style={{
-                          color: "#0081a2",
-                          fontSize: 12,
-                          marginTop: 10,
-                        }}
+                        style={[
+                          styles.stepTitle,
+                          { color: step.isFocus ? "white" : "#0081a2" },
+                        ]}
                       >
-                        รอบที่ {step.round}
+                        {step.name}
                       </Text>
-                    )}
+                      {step.isEvaluate && (
+                        <Text
+                          style={{
+                            color: "#0081a2",
+                            fontSize: 12,
+                            marginTop: 10,
+                          }}
+                        >
+                          รอบที่ {step.isEvaluatedToday} / 1
+                        </Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          ))}
+                </TouchableOpacity>
+              </View>
+            ))}
         </ScrollView>
+        <StarModal
+          isVisible={isModalVisible}
+          onCloseSuccess={() => {
+            setModalVisible(false);
+          }}
+        />
       </View>
     </LinearGradient>
   );

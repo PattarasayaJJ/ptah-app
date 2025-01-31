@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     nationality: String,
     Address: String,
     stars: { type: Number, default: 0 },
+    lastStarredAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null },
     deleteExpiry: { type: Date, default: null },
     AdddataFirst: { type: Boolean, default: false },
