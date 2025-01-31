@@ -36,22 +36,69 @@ const createMissionController = async (req, res) => {
 };
 
 // Get All mission
+// const getAllMissionController = async (req, res) => {
+//   try {
+//     console.log("req", req);
+
+//     const mission = await MissionModel.find();
+
+//     res.status(200).send({
+//       success: true,
+//       message: "All mission retrieved successfully",
+//       mission,
+//     });
+//   } catch (error) {
+//     console.error("Error in get all mission:", error);
+//     res.status(500).send({
+//       success: false,
+//       message: "Error in get all mission API",
+//       error,
+//     });
+//   }
+// };
 const getAllMissionController = async (req, res) => {
   try {
     console.log("req", req);
 
-    const mission = await MissionModel.find();
+    const missions = await MissionModel.find();
+
+    // ตรวจสอบแต่ละ mission ที่มี isEvaluate === true
+    const updatedMissions = await Promise.all(
+      missions.map(async (mission) => {
+        if (mission.isEvaluate) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // ตั้งเวลาเป็น 00:00:00 เพื่อตรวจสอบเฉพาะวัน
+
+          const evaluate = await EvaluateModel.findOne({
+            missionId: mission._id,
+            created_at: {
+              $gte: today, // ตรวจสอบว่ามีบันทึกที่ถูกสร้างวันนี้หรือไม่
+              $lt: new Date(today.getTime() + 86400000), // ภายในวันเดียวกัน
+            },
+          });
+
+          return {
+            ...mission.toObject(),
+            isEvaluatedToday: evaluate ? 1 : 0,
+          };
+        }
+        return {
+          ...mission.toObject(),
+          isEvaluatedToday: null,
+        };
+      })
+    );
 
     res.status(200).send({
       success: true,
-      message: "All mission retrieved successfully",
-      mission,
+      message: "All missions retrieved successfully",
+      missions: updatedMissions,
     });
   } catch (error) {
-    console.error("Error in get all mission:", error);
+    console.error("Error in get all missions:", error);
     res.status(500).send({
       success: false,
-      message: "Error in get all mission API",
+      message: "Error in get all missions API",
       error,
     });
   }
@@ -211,24 +258,75 @@ const snedEvaluateController = async (req, res) => {
       timeSpent,
     });
 
-    // เพิ่มค่า stars ของ user +1
-    const user = await UserModel.findByIdAndUpdate(
-      userId,
-      { $inc: { stars: 1 } }, // เพิ่มค่า stars +1
-      { new: true } // คืนค่าผู้ใช้หลังจากอัปเดต
-    );
-
     res.status(201).send({
       success: true,
       message: "evaluate created successfully",
       evaluate,
-      user,
+      // user,
     });
   } catch (error) {
     console.error("Error in create evaluate:", error);
     res.status(500).send({
       success: false,
       message: "Error in create evaluate API",
+      error,
+    });
+  }
+};
+
+const addStarToUserController = async (req, res) => {
+  try {
+    console.log("Checking if user qualifies for stars...");
+
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).send({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    // ดึง missions ที่มี isEvaluate === true
+    const missionsToEvaluate = await MissionModel.find({ isEvaluate: true });
+
+    // ตรวจสอบว่าทุก mission ที่ต้องมีการประเมินได้รับการประเมินวันนี้หรือไม่
+    const allEvaluatedToday = missionsToEvaluate.every(
+      (mission) => mission.isEvaluatedToday === 1
+    );
+
+    if (allEvaluatedToday) {
+      // อัปเดตดาวของ User
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        return res.status(404).send({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // เพิ่มค่า stars ของ user +1
+      const updateUser = await UserModel.findByIdAndUpdate(
+        userId,
+        { $inc: { stars: 1 } }, // เพิ่มค่า stars +1
+        { new: true } // คืนค่าผู้ใช้หลังจากอัปเดต
+      );
+
+      return res.status(200).send({
+        success: true,
+        message: "User received a star!",
+        updateUser,
+      });
+    }
+
+    res.status(400).send({
+      success: false,
+      message: "Not all missions have been evaluated today",
+    });
+  } catch (error) {
+    console.error("Error in addStarToUserController:", error);
+    res.status(500).send({
+      success: false,
+      message: "Error in adding stars to user",
       error,
     });
   }
@@ -241,4 +339,5 @@ module.exports = {
   updateSubmissionController,
   getSubmissionDataController,
   snedEvaluateController,
+  addStarToUserController,
 };

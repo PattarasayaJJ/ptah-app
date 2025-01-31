@@ -4,7 +4,7 @@ const MissionsSchema = new mongoose.Schema({
   no: Number,
   name: String,
   submission: { type: [String], default: null },
-  isCompleted: { type: Boolean, default: false },
+  isEvaluate: { type: Boolean, default: false },
   completedAt: Date,
 });
 

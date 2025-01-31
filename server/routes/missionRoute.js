@@ -10,6 +10,7 @@ const {
   updateSubmissionController,
   getSubmissionDataController,
   snedEvaluateController,
+  addStarToUserController,
 } = require("../controllers/missionController");
 
 const router = express.Router();
@@ -24,6 +25,11 @@ router.post(
   requireSignIn,
   checkDailyLimit,
   snedEvaluateController
+);
+router.get(
+  "/check/daily-mission/add-star",
+  requireSignIn,
+  addStarToUserController
 );
 
 module.exports = router;
