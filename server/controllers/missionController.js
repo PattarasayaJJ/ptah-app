@@ -207,17 +207,13 @@ const getSubmissionDataController = async (req, res) => {
     console.log("mission", mission);
 
     // Loop หา SubMission ตาม ID ใน submission
-    const submissions = [];
-    mission.submission.map(async (submissionId) => {
-      // ค้นหา SubMission ทีละ ID
-      console.log("submissionId", submissionId);
-
-      const data = await SubMissionModel.findById(submissionId);
-      console.log("data", data);
-      submissions.push(data || null);
-      // return data || null; // ถ้าไม่เจอคืนค่า null
-    });
-    await delay(200);
+    const submissions = await Promise.all(
+      mission.submission.map(async (submissionId) => {
+        const data = await SubMissionModel.findById(submissionId);
+        return data || null; // ถ้าไม่เจอคืนค่า null
+      })
+    );
+    await delay(1500);
 
     // ส่งผลลัพธ์กลับ
     res.status(200).send({

@@ -18,8 +18,16 @@ const StepScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    handleGetMission();
-  }, []);
+    const unsubscribe = navigation.addListener("focus", () => {
+      // The screen is focused
+      // Call any action
+
+      handleGetMission();
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation]);
 
   const handleGetMission = async () => {
     try {
@@ -27,45 +35,13 @@ const StepScreen = ({ navigation }) => {
 
       if (response.status === 200) {
         setSteps(response.data.missions);
-        checkAllEvaluates(response.data.missions);
       }
     } catch (error) {
       console.log("err call api get question", error);
     }
   };
 
-  const checkAllEvaluates = async (missions) => {
-    // กรองเฉพาะ mission ที่ต้องประเมิน (isEvaluate === true)
-    const missionsToEvaluate = missions.filter(
-      (mission) => mission.isEvaluate === true
-    );
-
-    // ตรวจสอบว่าทุก mission ที่ต้องประเมิน ถูกประเมินแล้ว (`isEvaluatedToday === 1`)
-    const allEvaluated = missionsToEvaluate.every(
-      (mission) => mission.isEvaluatedToday === 1
-    );
-
-    if (allEvaluated) {
-      console.log("✅ ทุก mission ที่ต้องประเมินถูกประเมินแล้ว! เรียก API...");
-
-      try {
-        // เรียก API
-        const response = await axios.get(
-          "/mission/check/daily-mission/add-star"
-        );
-
-        if (response.status === 200) {
-          setModalVisible(true);
-        }
-      } catch (error) {
-        console.log("❌ API call failed:", error);
-      }
-    } else {
-      console.log("⚠️ ยังมี mission ที่ไม่ได้ถูกประเมินครบถ้วน");
-    }
-  };
-
-  const handleSelectMission = (selectedMissionId) => {
+  const handleSelectMission = (selectedMissionId, isEvaluatedToday) => {
     // กรองเฉพาะ `_id` ของ mission ที่ `isEvaluatedToday = 0`
     let missionsToEvaluate = steps
       .filter((mission) => mission.isEvaluatedToday === 0)
@@ -78,6 +54,7 @@ const StepScreen = ({ navigation }) => {
     navigation.navigate("StepDetail", {
       id: selectedMissionId,
       missionsToEvaluate,
+      isEvaluatedToday,
     });
   };
 
@@ -111,8 +88,9 @@ const StepScreen = ({ navigation }) => {
                 )}
                 {/* วงกลม */}
                 <TouchableOpacity
-                  disabled={step.isEvaluatedToday === 1}
-                  onPress={() => handleSelectMission(step._id)}
+                  onPress={() =>
+                    handleSelectMission(step._id, step.isEvaluatedToday)
+                  }
                   style={[
                     styles.stepContainer,
                     index % 2 === 0 ? styles.stepRight : styles.stepLeft,

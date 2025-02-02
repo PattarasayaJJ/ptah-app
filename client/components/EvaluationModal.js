@@ -58,7 +58,7 @@ const EvaluationModal = ({
         </Text>
         <Text style={styles.description}>{`ท่าที่ ${subMissionLength + 1} ${
           Object.keys(missionDetail).length !== 0
-            ? missionDetail?.submissions[subMissionLength].name
+            ? missionDetail?.submissions[subMissionLength]?.name
             : ""
         }`}</Text>
 

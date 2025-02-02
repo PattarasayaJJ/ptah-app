@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Video } from "expo-av";
@@ -32,7 +33,8 @@ const StepDetailScreen = ({ navigation, route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isModalVisible2, setModalVisible2] = useState(false);
   const [answers, setAnswers] = useState([]);
-  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [evaluated, setEvaluated] = useState(false);
 
   useEffect(() => {
     handleGetMissionDetail();
@@ -53,17 +55,31 @@ const StepDetailScreen = ({ navigation, route }) => {
 
   const handleGetMissionDetail = async () => {
     try {
+      setIsLoading(true);
+      setSubMissionLength(0);
+      setAnswers([]);
+
       const response = await axios.get(
         `/mission/get-mission/${route.params.id}`
       );
+      console.log("response", response);
 
       if (response.status === 200) {
         setMissionDetail(response.data.data);
         setMaxSubMissionLength(response.data.data.submissions.length);
         setIsRunning(response.data.data.mission.isEvaluate);
+        setEvaluated(
+          (response.data.data.mission.isEvaluate &&
+            route.params.isEvaluatedToday === 0) ||
+            route.params.isEvaluatedToday === undefined
+            ? true
+            : false
+        );
+        setIsLoading(false);
       }
     } catch (error) {
       console.log("err call api get question", error);
+      setIsLoading(false);
     }
   };
 
@@ -71,17 +87,15 @@ const StepDetailScreen = ({ navigation, route }) => {
     if (maxSubMissionLength === subMissionLength + 1) {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
         // call function send all evaluate
-
-        // console.log("answers", answers);
-        toggleModal();
+        if (route.params.isEvaluatedToday === 1) {
+          navigation.goBack();
+        } else {
+          toggleModal();
+        }
       } else {
         let missionsToEvaluate = route.params.missionsToEvaluate;
         const id = missionsToEvaluate.shift();
-        // navigation.goBack();
-        // navigation.navigate("StepDetail", {
-        //   id: id,
-        //   missionsToEvaluate,
-        // });
+
         navigation.setParams({
           id: id,
           missionsToEvaluate,
@@ -90,8 +104,11 @@ const StepDetailScreen = ({ navigation, route }) => {
     } else {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
         // open pop up evaluate
-
-        toggleModal();
+        if (evaluated) {
+          toggleModal();
+        } else {
+          setSubMissionLength((prev) => prev + 1);
+        }
       } else {
         setSubMissionLength((prev) => prev + 1);
       }
@@ -123,6 +140,7 @@ const StepDetailScreen = ({ navigation, route }) => {
 
   const onCloseSuccess = () => {
     setModalVisible2(false);
+
     navigation.navigate("Resultstherapy", {
       answers,
       time,
@@ -157,77 +175,92 @@ const StepDetailScreen = ({ navigation, route }) => {
         >
           <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
         </TouchableOpacity>
-        {missionDetail.submissions &&
-          missionDetail?.submissions[subMissionLength]?.evaluate && (
-            <View style={{ alignItems: "flex-end", marginRight: 10 }}>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0096bd" />
+            <Text style={styles.loadingText}>กำลังโหลดข้อมูล...</Text>
+          </View>
+        ) : (
+          <View>
+            {evaluated && (
+              <View style={{ alignItems: "flex-end", marginRight: 10 }}>
+                <Text style={styles.stepNumber}>
+                  <FontAwesome5 name="stopwatch" color="#6bdbfc" size={18} />
+                  <Text style={{ fontSize: 18, color: "#6bdbfc" }}>
+                    {" "}
+                    {formatTime(time)}
+                    {" น."}
+                  </Text>
+                </Text>
+              </View>
+            )}
+            <View style={styles.container}>
               <Text style={styles.stepNumber}>
-                <FontAwesome5 name="stopwatch" color="#6bdbfc" size={18} />
-                <Text style={{ fontSize: 18, color: "#6bdbfc" }}>
+                ด่านที่
+                <Text style={{ fontSize: 28 }}>
                   {" "}
-                  {formatTime(time)}
-                  {" น."}
+                  {missionDetail?.mission?.no}
                 </Text>
               </Text>
-            </View>
-          )}
-        <View style={styles.container}>
-          <Text style={styles.stepNumber}>
-            ด่านที่
-            <Text style={{ fontSize: 28 }}> {missionDetail?.mission?.no}</Text>
-          </Text>
-          <Text style={styles.stepNumber}>
-            {missionDetail.submissions
-              ? missionDetail.submissions[subMissionLength].name
-              : ""}
-          </Text>
-          <View style={{ flexDirection: "row" }}>
-            {btn.map((value, idx) => (
-              <TouchableOpacity
-                key={idx}
-                onPress={() => setIsSelected(idx)}
-                style={[
-                  styles.tabBtn,
-                  { backgroundColor: isSelected === idx ? "#64dafc" : "white" },
-                ]}
-              >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: isSelected === idx ? "white" : "black",
-                  }}
-                >
-                  {value}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+              <Text style={styles.stepNumber}>
+                {missionDetail.submissions
+                  ? missionDetail?.submissions[subMissionLength]?.name
+                  : ""}
+              </Text>
+              <View style={{ flexDirection: "row" }}>
+                {btn.map((value, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() => setIsSelected(idx)}
+                    style={[
+                      styles.tabBtn,
+                      {
+                        backgroundColor:
+                          isSelected === idx ? "#64dafc" : "white",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        color: isSelected === idx ? "white" : "black",
+                      }}
+                    >
+                      {value}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-          <View style={{ marginTop: 30 }}>
-            {isSelected === 0 ? (
-              <Video
-                ref={videoRef}
-                style={styles.video}
-                source={{
-                  uri: missionDetail.submissions
-                    ? missionDetail?.submissions[subMissionLength]?.videoUrl
-                    : "",
-                }}
-                useNativeControls // Enables play/pause and other controls
-                resizeMode="cover" // Adjusts how the video is scaled
-                isLooping // Makes the video loop
-              />
-            ) : (
-              <Image
-                style={[styles.video, { resizeMode: "contain" }]}
-                source={{
-                  uri: missionDetail.submissions
-                    ? missionDetail?.submissions[subMissionLength]?.photoUrl
-                    : "",
-                }}
-              />
-            )}
+              <View style={{ marginTop: 30 }}>
+                {isSelected === 0 ? (
+                  <Video
+                    ref={videoRef}
+                    style={styles.video}
+                    source={{
+                      uri: missionDetail.submissions
+                        ? missionDetail?.submissions[subMissionLength]?.videoUrl
+                        : "",
+                    }}
+                    useNativeControls // Enables play/pause and other controls
+                    resizeMode="cover" // Adjusts how the video is scaled
+                    isLooping // Makes the video loop
+                  />
+                ) : (
+                  <Image
+                    style={[styles.video, { resizeMode: "contain" }]}
+                    source={{
+                      uri: missionDetail.submissions
+                        ? missionDetail?.submissions[subMissionLength]?.photoUrl
+                        : "",
+                    }}
+                  />
+                )}
+              </View>
+            </View>
           </View>
-        </View>
+        )}
+
         <View
           style={{ marginTop: 60, marginRight: 20, alignItems: "flex-end" }}
         >
@@ -307,6 +340,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { color: "#0096bd", fontSize: 16, marginTop: 10 },
 });
 
 export default StepDetailScreen;

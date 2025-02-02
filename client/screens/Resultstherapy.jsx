@@ -88,9 +88,9 @@ const Resultstherapy = ({ navigation, route }) => {
       );
 
       if (response.status === 201) {
-        setModalVisible(true);
         if (route.params.missionsToEvaluate.length === 0) {
-          navigation.navigate("Step");
+          //
+          checkAllEvaluates();
         } else {
           let missionsToEvaluate = route.params.missionsToEvaluate;
           const id = missionsToEvaluate.shift();
@@ -104,6 +104,19 @@ const Resultstherapy = ({ navigation, route }) => {
     } catch (error) {
       console.log("err", error);
       Alert.alert("ขออภัย", "คุณสามารถทำการประเมินได้เพียงครั้งเดียวต่อวัน");
+    }
+  };
+
+  const checkAllEvaluates = async () => {
+    try {
+      // เรียก API
+      const response = await axios.get("/mission/check/daily-mission/add-star");
+
+      if (response.status === 200) {
+        setModalVisible(true);
+      }
+    } catch (error) {
+      console.log("❌ API call failed:", error);
     }
   };
 
@@ -175,7 +188,7 @@ const Resultstherapy = ({ navigation, route }) => {
         isVisible={isModalVisible}
         onCloseSuccess={() => {
           setModalVisible(false);
-          navigation.navigate("Home");
+          navigation.navigate("Step");
         }}
       />
     </LinearGradient>
