@@ -52,7 +52,11 @@ const MissionModal = ({ visible, mission = {}, onClose, onStart }) => {
           ) : (
             <>
               <Text style={styles.description}>
-                ประกอบด้วยท่ากายภาพ {mission.submission.length} ท่า
+                ประกอบด้วยท่ากายภาพ{" "}
+                {Object.keys(mission).length === 0
+                  ? ""
+                  : mission.submission.length}{" "}
+                ท่า
               </Text>
               <Text style={styles.note}>
                 หมายเหตุ : มีการนับเวลาในการทำกายภาพ
