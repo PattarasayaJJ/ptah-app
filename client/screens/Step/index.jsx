@@ -35,6 +35,8 @@ const StepScreen = ({ navigation }) => {
       const response = await axios.get("/mission/get-all-mission");
 
       if (response.status === 200) {
+        console.log("response", response.data);
+
         setSteps(response.data.missions);
       }
     } catch (error) {

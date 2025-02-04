@@ -59,6 +59,7 @@ const createMissionController = async (req, res) => {
 const getAllMissionController = async (req, res) => {
   try {
     const missions = await MissionModel.find();
+    const { _id } = req.auth;
 
     // ตรวจสอบแต่ละ mission ที่มี isEvaluate === true
     const updatedMissions = await Promise.all(
@@ -68,7 +69,7 @@ const getAllMissionController = async (req, res) => {
           today.setHours(0, 0, 0, 0); // ตั้งเวลาเป็น 00:00:00 เพื่อตรวจสอบเฉพาะวัน
 
           const evaluate = await EvaluateModel.findOne({
-            missionId: mission._id,
+            userId: _id,
             created_at: {
               $gte: today, // ตรวจสอบว่ามีบันทึกที่ถูกสร้างวันนี้หรือไม่
               $lt: new Date(today.getTime() + 86400000), // ภายในวันเดียวกัน
