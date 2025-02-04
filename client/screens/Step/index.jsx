@@ -52,7 +52,7 @@ const StepScreen = ({ navigation }) => {
     missionsToEvaluate = missionsToEvaluate.filter(
       (missionId) => missionId !== isSelectedMission.selectedMissionId
     );
-
+    setModalVisible(false);
     // นำทางไปยังหน้าถัดไป พร้อมส่ง `_id` ของ mission ที่ถูกเลือกและ `_id` ของรายการที่ต้องประเมิน
     navigation.navigate("StepDetail", {
       id: isSelectedMission._id,

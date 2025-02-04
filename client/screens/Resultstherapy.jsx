@@ -38,10 +38,7 @@ const Resultstherapy = ({ navigation, route }) => {
   const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    console.log("route", route);
-    if (answers.length > 0) {
-      handleGetAnswersFromLocal();
-    }
+    handleGetAnswersFromLocal();
 
     setTime(time);
   }, []);
@@ -95,7 +92,7 @@ const Resultstherapy = ({ navigation, route }) => {
     try {
       const data = {
         userId: authState.user._id,
-        missionId: route.params.missionId,
+        missionId: missionId,
         answers: answers,
         suggestion: doctorMessage,
         timeSpent: formatTime(time),
@@ -107,17 +104,16 @@ const Resultstherapy = ({ navigation, route }) => {
       );
 
       if (response.status === 201) {
+        const currentDate = moment().format("DD/MM/YYYY");
+
+        await AsyncStorage.setItem(
+          `answers_${currentDate}`,
+          JSON.stringify(exerciseResults)
+        );
         if (route.params.missionsToEvaluate.length === 0) {
           //
           checkAllEvaluates();
         } else {
-          const currentDate = moment().format("DD/MM/YYYY");
-
-          await AsyncStorage.setItem(
-            `answers_${currentDate}`,
-            JSON.stringify(exerciseResults)
-          );
-
           let missionsToEvaluate = route.params.missionsToEvaluate;
           const id = missionsToEvaluate.shift();
           // navigation.goBack();
@@ -206,12 +202,14 @@ const Resultstherapy = ({ navigation, route }) => {
             </>
           )}
 
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={() => handleSendAnswer()}
-          >
-            <Text style={styles.submitButtonText}>ส่งแบบประเมิน</Text>
-          </TouchableOpacity>
+          {answers.length > 0 && (
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={() => handleSendAnswer()}
+            >
+              <Text style={styles.submitButtonText}>ส่งแบบประเมิน</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </View>
       <StarModal

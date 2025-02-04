@@ -70,6 +70,7 @@ const getAllMissionController = async (req, res) => {
 
           const evaluate = await EvaluateModel.findOne({
             userId: _id,
+            missionId: mission._id,
             created_at: {
               $gte: today, // ตรวจสอบว่ามีบันทึกที่ถูกสร้างวันนี้หรือไม่
               $lt: new Date(today.getTime() + 86400000), // ภายในวันเดียวกัน
