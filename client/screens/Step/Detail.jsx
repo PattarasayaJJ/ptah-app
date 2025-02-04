@@ -62,7 +62,6 @@ const StepDetailScreen = ({ navigation, route }) => {
       const response = await axios.get(
         `/mission/get-mission/${route.params.id}`
       );
-      console.log("response", response);
 
       if (response.status === 200) {
         setMissionDetail(response.data.data);
@@ -87,19 +86,24 @@ const StepDetailScreen = ({ navigation, route }) => {
     if (maxSubMissionLength === subMissionLength + 1) {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
         // call function send all evaluate
+
         if (route.params.isEvaluatedToday === 1) {
           navigation.goBack();
         } else {
           toggleModal();
         }
       } else {
-        let missionsToEvaluate = route.params.missionsToEvaluate;
-        const id = missionsToEvaluate.shift();
+        if (route.params.missionsToEvaluate.length > 0) {
+          let missionsToEvaluate = route.params.missionsToEvaluate;
+          const id = missionsToEvaluate.shift();
 
-        navigation.setParams({
-          id: id,
-          missionsToEvaluate,
-        });
+          navigation.setParams({
+            id: id,
+            missionsToEvaluate,
+          });
+        } else {
+          navigation.goBack();
+        }
       }
     } else {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {

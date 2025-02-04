@@ -13,6 +13,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../context/authContext";
 import moment from "moment";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import "moment/locale/th";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import axios from "axios";
@@ -22,21 +24,38 @@ import HeaderLogo from "./HeaderLogo";
 moment.locale("th");
 
 const Resultstherapy = ({ navigation, route }) => {
+  const params = route?.params || {}; // ป้องกัน undefined
+  const {
+    answers = [],
+    missionId = "",
+    missionsToEvaluate = [""],
+    time = 0,
+  } = params;
   const [authState] = useContext(AuthContext);
   const [doctorMessage, setDoctorMessage] = useState("");
   const [exerciseResults, setexerciseResults] = useState([]);
-  const [time, setTime] = useState(0);
+  const [resultTime, setTime] = useState(0);
   const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    // handleGetMission();
+    console.log("route", route);
+    if (answers.length > 0) {
+      handleGetAnswersFromLocal();
+    }
 
-    setexerciseResults(
-      route.params?.answers !== undefined ? route.params.answers : []
-    );
-    setTime(route.params?.time !== undefined ? route.params.time : 0);
+    setTime(time);
   }, []);
 
+  const handleGetAnswersFromLocal = async () => {
+    const currentDate = moment().format("DD/MM/YYYY");
+    const jsonValue = await AsyncStorage.getItem(`answers_${currentDate}`);
+
+    const arrValue = jsonValue != null ? JSON.parse(jsonValue) : [];
+
+    console.log("arrValue", arrValue);
+
+    setexerciseResults([...arrValue, ...answers]);
+  };
   const getLevelColor = (level) => {
     switch (level) {
       case "ง่าย":
@@ -77,7 +96,7 @@ const Resultstherapy = ({ navigation, route }) => {
       const data = {
         userId: authState.user._id,
         missionId: route.params.missionId,
-        answers: exerciseResults,
+        answers: answers,
         suggestion: doctorMessage,
         timeSpent: formatTime(time),
       };
@@ -92,6 +111,13 @@ const Resultstherapy = ({ navigation, route }) => {
           //
           checkAllEvaluates();
         } else {
+          const currentDate = moment().format("DD/MM/YYYY");
+
+          await AsyncStorage.setItem(
+            `answers_${currentDate}`,
+            JSON.stringify(exerciseResults)
+          );
+
           let missionsToEvaluate = route.params.missionsToEvaluate;
           const id = missionsToEvaluate.shift();
           // navigation.goBack();
@@ -154,12 +180,12 @@ const Resultstherapy = ({ navigation, route }) => {
         <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.card}>
             <Text style={[styles.date, { fontSize: 12 }]}>
-              ระยะเวลาในการทำกายภาพ {formatTime(time, "hhmm")} นาที
+              ระยะเวลาในการทำกายภาพ {formatTime(resultTime)} นาที
             </Text>
             <FlatList
               data={exerciseResults}
               renderItem={renderItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => `exercise-${index}`}
               style={styles.resultList}
               ListEmptyComponent={() => (
                 <View style={styles.emptyContainer}>
@@ -168,13 +194,17 @@ const Resultstherapy = ({ navigation, route }) => {
               )}
             />
           </View>
-          <Text style={styles.label}>ข้อความถึงแพทย์:</Text>
-          <TextInput
-            style={styles.input}
-            value={doctorMessage}
-            onChangeText={(text) => setDoctorMessage(text)}
-            multiline
-          />
+          {missionsToEvaluate.length === 0 && (
+            <>
+              <Text style={styles.label}>ข้อความถึงแพทย์:</Text>
+              <TextInput
+                style={styles.input}
+                value={doctorMessage}
+                onChangeText={(text) => setDoctorMessage(text)}
+                multiline
+              />
+            </>
+          )}
 
           <TouchableOpacity
             style={styles.submitButton}

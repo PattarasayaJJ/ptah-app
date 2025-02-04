@@ -10,12 +10,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import axios from "axios";
-import StarModal from "../../components/StarModal";
+import MissionModal from "../../components/MissionModal";
 import HeaderLogo from "../HeaderLogo";
 
 const StepScreen = ({ navigation }) => {
   const [steps, setSteps] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSelectedMission, setIsSelectedMission] = useState({});
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -41,21 +42,26 @@ const StepScreen = ({ navigation }) => {
     }
   };
 
-  const handleSelectMission = (selectedMissionId, isEvaluatedToday) => {
+  const handleSelectMission = () => {
     // กรองเฉพาะ `_id` ของ mission ที่ `isEvaluatedToday = 0`
     let missionsToEvaluate = steps
       .filter((mission) => mission.isEvaluatedToday === 0)
       .map((mission) => mission._id);
     missionsToEvaluate = missionsToEvaluate.filter(
-      (missionId) => missionId !== selectedMissionId
+      (missionId) => missionId !== isSelectedMission.selectedMissionId
     );
 
     // นำทางไปยังหน้าถัดไป พร้อมส่ง `_id` ของ mission ที่ถูกเลือกและ `_id` ของรายการที่ต้องประเมิน
     navigation.navigate("StepDetail", {
-      id: selectedMissionId,
+      id: isSelectedMission._id,
       missionsToEvaluate,
-      isEvaluatedToday,
+      isEvaluatedToday: isSelectedMission.isEvaluatedToday,
     });
+  };
+
+  const toggleModal = (step) => {
+    setModalVisible(true);
+    setIsSelectedMission(step);
   };
 
   return (
@@ -88,9 +94,7 @@ const StepScreen = ({ navigation }) => {
                 )}
                 {/* วงกลม */}
                 <TouchableOpacity
-                  onPress={() =>
-                    handleSelectMission(step._id, step.isEvaluatedToday)
-                  }
+                  onPress={() => toggleModal(step)}
                   style={[
                     styles.stepContainer,
                     index % 2 === 0 ? styles.stepRight : styles.stepLeft,
@@ -139,11 +143,11 @@ const StepScreen = ({ navigation }) => {
               </View>
             ))}
         </ScrollView>
-        <StarModal
-          isVisible={isModalVisible}
-          onCloseSuccess={() => {
-            setModalVisible(false);
-          }}
+        <MissionModal
+          visible={isModalVisible}
+          mission={isSelectedMission}
+          onClose={() => setModalVisible(false)}
+          onStart={() => handleSelectMission()}
         />
       </View>
     </LinearGradient>
