@@ -50,7 +50,7 @@ const StepScreen = ({ navigation }) => {
       .filter((mission) => mission.isEvaluatedToday === 0)
       .map((mission) => mission._id);
     missionsToEvaluate = missionsToEvaluate.filter(
-      (missionId) => missionId !== isSelectedMission.selectedMissionId
+      (missionId) => missionId !== isSelectedMission._id
     );
     setModalVisible(false);
     // นำทางไปยังหน้าถัดไป พร้อมส่ง `_id` ของ mission ที่ถูกเลือกและ `_id` ของรายการที่ต้องประเมิน

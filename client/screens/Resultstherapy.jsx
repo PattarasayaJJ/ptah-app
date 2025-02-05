@@ -39,19 +39,26 @@ const Resultstherapy = ({ navigation, route }) => {
 
   useEffect(() => {
     handleGetAnswersFromLocal();
-
-    setTime(time);
   }, []);
 
   const handleGetAnswersFromLocal = async () => {
     const currentDate = moment().format("DD/MM/YYYY");
-    const jsonValue = await AsyncStorage.getItem(`answers_${currentDate}`);
+    const jsonValue = await AsyncStorage.getItem(
+      `answers_${currentDate}_${authState.user._id}`
+    );
+    const timeValue = await AsyncStorage.getItem(
+      `time_${currentDate}_${authState.user._id}`
+    );
 
     const arrValue = jsonValue != null ? JSON.parse(jsonValue) : [];
+
+    const timeAsyncValue =
+      time !== 0 ? time : timeValue != null ? Number(timeValue) : 0;
 
     console.log("arrValue", arrValue);
 
     setexerciseResults([...arrValue, ...answers]);
+    setTime(timeAsyncValue);
   };
   const getLevelColor = (level) => {
     switch (level) {
@@ -107,8 +114,13 @@ const Resultstherapy = ({ navigation, route }) => {
         const currentDate = moment().format("DD/MM/YYYY");
 
         await AsyncStorage.setItem(
-          `answers_${currentDate}`,
+          `answers_${currentDate}_${authState.user._id}`,
           JSON.stringify(exerciseResults)
+        );
+
+        await AsyncStorage.setItem(
+          `time_${currentDate}_${authState.user._id}`,
+          `${time}`
         );
         if (route.params.missionsToEvaluate.length === 0) {
           //
@@ -207,7 +219,11 @@ const Resultstherapy = ({ navigation, route }) => {
               style={styles.submitButton}
               onPress={() => handleSendAnswer()}
             >
-              <Text style={styles.submitButtonText}>ส่งแบบประเมิน</Text>
+              <Text style={styles.submitButtonText}>
+                {missionsToEvaluate.length === 0
+                  ? "ส่งแบบประเมิน"
+                  : "บันทึกประเมิน"}
+              </Text>
             </TouchableOpacity>
           )}
         </ScrollView>

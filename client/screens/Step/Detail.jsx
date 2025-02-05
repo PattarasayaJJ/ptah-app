@@ -38,6 +38,7 @@ const StepDetailScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     handleGetMissionDetail();
+    console.log("route", route);
   }, [route.params.id]);
   useEffect(() => {
     let timer = null;
