@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Platform,
   TouchableOpacity,
   ScrollView,
+  Image
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -20,40 +21,33 @@ const StepScreen = ({ navigation }) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      // The screen is focused
-      // Call any action
-
       handleGetMission();
     });
 
-    // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
 
   const handleGetMission = async () => {
     try {
       const response = await axios.get("/mission/get-all-mission");
-
       if (response.status === 200) {
-        console.log("response", response.data);
-
         setSteps(response.data.missions);
       }
     } catch (error) {
-      console.log("err call api get question", error);
+      console.log("Error fetching missions", error);
     }
   };
 
   const handleSelectMission = () => {
-    // กรองเฉพาะ `_id` ของ mission ที่ `isEvaluatedToday = 0`
     let missionsToEvaluate = steps
       .filter((mission) => mission.isEvaluatedToday === 0)
       .map((mission) => mission._id);
+
     missionsToEvaluate = missionsToEvaluate.filter(
       (missionId) => missionId !== isSelectedMission._id
     );
+
     setModalVisible(false);
-    // นำทางไปยังหน้าถัดไป พร้อมส่ง `_id` ของ mission ที่ถูกเลือกและ `_id` ของรายการที่ต้องประเมิน
     navigation.navigate("StepDetail", {
       id: isSelectedMission._id,
       missionsToEvaluate,
@@ -67,89 +61,51 @@ const StepScreen = ({ navigation }) => {
   };
 
   return (
-    <LinearGradient
-      colors={["#FFFFFF", "#baefff"]} // ไล่สีจากฟ้าจางไปขาว
-      style={styles.gradient}
-    >
+    <LinearGradient colors={["#FFFFFF", "#FFFFFF"]} style={styles.gradient}>
+
       <View style={{ marginBottom: 60 }}>
-        <View style={styles.containerHeader}>
-          <HeaderLogo />
-        </View>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
-        </TouchableOpacity>
+        
         <ScrollView contentContainerStyle={styles.container}>
+
           {steps?.length > 0 &&
-            steps.map((step, index) => (
-              <View key={step._id} style={styles.stepWrapper}>
-                {/* เส้นเฉียง */}
-                {index < steps.length - 1 && (
-                  <View
-                    style={[
-                      styles.diagonalLine,
-                      index % 2 === 0 ? styles.lineLeft : styles.lineRight,
-                    ]}
-                  />
-                )}
-                {/* วงกลม */}
-                <TouchableOpacity
-                  onPress={() => toggleModal(step)}
-                  style={[
-                    styles.stepContainer,
-                    index % 2 === 0 ? styles.stepRight : styles.stepLeft,
-                  ]}
-                >
-                  <View>
-                    <Text
-                      style={[
-                        styles.stepNumber,
-                        { textAlign: index % 2 === 0 ? "left" : "right" },
-                      ]}
-                    >
-                      ด่านที่ <Text style={{ fontSize: 28 }}> {step.no}</Text>
-                    </Text>
-                    <View
-                      style={[
-                        styles.circle,
-                        {
-                          backgroundColor: step.isFocus ? "#64dafc" : "white",
-                          borderColor: step.isFocus ? "white" : "#64dafc",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.stepTitle,
-                          { color: step.isFocus ? "white" : "#0081a2" },
-                        ]}
-                      >
-                        {step.name}
-                      </Text>
-                      {step.isEvaluate && (
-                        <Text
-                          style={{
-                            color: "#0081a2",
-                            fontSize: 12,
-                            marginTop: 10,
-                          }}
-                        >
-                          รอบที่ {step.isEvaluatedToday} / 1
-                        </Text>
-                      )}
+            steps.map((step) => (
+              <TouchableOpacity
+                key={step._id}
+                onPress={() => toggleModal(step)}
+                style={[
+                  styles.stepCard,
+                  step.no === 1 ? styles.firstStepCard : null,
+                ]}
+              >
+                <View style={styles.stepHeader}>
+                  <Text style={styles.stepNumber}>{step.no}</Text>
+                  <Text style={styles.stepTitle}>{step.name}</Text>
+                </View>
+                {step.no !== 1 && (
+                  <View style={styles.progressBarContainer}>
+                    <View style={styles.progressBarBackground}>
+                      <View
+                        style={{
+                          ...styles.progressBar,
+                          width: `${(step.isEvaluatedToday / 1) * 100}%`,
+                          backgroundColor:
+                            step.isEvaluatedToday === 1 ? "#4caf50" : "#bdbdbd",
+                        }}
+                      />
                     </View>
+                    <Text style={styles.progressText}>
+                      {step.isEvaluatedToday}/1
+                    </Text>
                   </View>
-                </TouchableOpacity>
-              </View>
+                )}
+              </TouchableOpacity>
             ))}
         </ScrollView>
         <MissionModal
           visible={isModalVisible}
           mission={isSelectedMission}
           onClose={() => setModalVisible(false)}
-          onStart={() => handleSelectMission()}
+          onStart={handleSelectMission}
         />
       </View>
     </LinearGradient>
@@ -166,65 +122,73 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   backButton: {
     marginLeft: 10,
   },
-  stepWrapper: {
-    position: "relative",
-    marginBottom: 40,
-  },
-  stepContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  stepLeft: {
-    justifyContent: "flex-end",
-    paddingRight: 20,
-  },
-  stepRight: {
-    justifyContent: "flex-start",
-    paddingLeft: 20,
-  },
-  circle: {
-    width: 140,
-    height: 140,
-    borderRadius: 99,
-    justifyContent: "center",
-    alignItems: "center",
+  stepCard: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    marginVertical: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 4,
-    borderWidth: 1,
+    elevation: 3,
+  },
+  firstStepCard: {
+    backgroundColor: "#DCF0FC",
+    borderRadius: 10,
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    height:100,
+    justifyContent: "center", // จัดให้อยู่ตรงกลางแนวตั้ง
+
+    
+  },
+  stepHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
   stepNumber: {
-    fontSize: 14,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#008cb7",
+    marginRight: 10,
   },
   stepTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+    color: "#333",
+    fontFamily: "Kanit",
+    fontSize:18,
+
   },
-  diagonalLine: {
-    position: "absolute",
-    width: 190,
-    height: 5,
-    backgroundColor: "#aa875f",
-    zIndex: -1,
+  progressBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  lineLeft: {
-    top: 210, // ระยะจากด้านบน
-    left: 120, // ระยะจากด้านซ้าย
-    transform: [{ rotate: "45deg" }],
+  progressBarBackground: {
+    flex: 1,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#e0e0e0",
+    overflow: "hidden",
+    marginRight: 10,
   },
-  lineRight: {
-    top: 210, // ระยะจากด้านบน
-    right: 120, // ระยะจากด้านขวา
-    transform: [{ rotate: "-45deg" }],
+  progressBar: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    color: "#555",
   },
 });
 

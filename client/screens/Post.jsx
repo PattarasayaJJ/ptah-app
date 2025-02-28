@@ -85,7 +85,7 @@ const Post = ({ navigation }) => {
             disabled={loading}
           >
             <Text style={styles.postBtnText}>
-              <FontAwesome5 name="plus-square" size={20} />{" "}
+  
               สร้างกระทู้
             </Text>
           </TouchableOpacity>

@@ -13,21 +13,20 @@ const Myposts = () => {
 
 
   //get user post
-  const getUserPosts = async ()=>{
-    try{
-      setLoading(true)
-      const { data } = await axios.get(`/post/get-user-posts`)
-      //const { data } = await axios.get('http://10.0.2.2:8080/api/v1/post/get-user-posts');
-
-      setLoading(false)
-      setPosts(data?.userPosts)
-    }catch (error) {
-      setLoading(false)
-      console.log(error)
-      alert(error)
-
+  const getUserPosts = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`/post/get-user-posts`);
+      console.log("User posts data:", data); // เพิ่มเพื่อ Debug
+      setLoading(false);
+      setPosts(data?.userPosts);
+    } catch (error) {
+      setLoading(false);
+      console.log("Error fetching user posts:", error);
+      alert(error);
     }
-  }
+  };
+  
 
 
   //initaial 
@@ -41,7 +40,8 @@ const Myposts = () => {
       <ScrollView         
       contentContainerStyle={styles.scrollViewContent}
 >
-      <Text style={styles.heading}>กระทู้ของฉัน  กระทู้</Text>
+      <Text style={styles.heading}>กระทู้ของฉัน {posts.length} กระทู้
+      </Text>
 
         <PostCard posts={posts} myPostScreen={true}/>
       </ScrollView>

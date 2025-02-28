@@ -29,7 +29,7 @@ const Account = () => {
                     }}
                 />
                 <View style={styles.textContainer}>
-                    <Text style={styles.username}>{authState?.user.name}  {authState?.user.surname}</Text>
+                    <Text style={styles.username}> {authState?.user.name}  {authState?.user.surname}  {(authState.user?.stars|| 0) + 1 } ⭐</Text>
                     <Text style={styles.idcard}> เบอร์โทรศัพท์ : {authState?.user.tel} </Text>
                     <Text style={styles.idcard}> รหัสบัตรประจำตัวประชาชน :  {authState?.user.ID_card_number}</Text>
                     <Text style={styles.idcard}> Email : {authState?.user.email}</Text>
@@ -107,20 +107,21 @@ const styles = StyleSheet.create({
         marginLeft: 10
     },
     imgprofile: {
-        width: 90,
-        height: 90,
-        borderRadius: 30,
+        width: 75,
+        height: 75,
+        borderRadius: 20,
     },
-    name: {
+    username: {
         fontSize: 15,
         color: "black",
         fontFamily:"Kanit",
+        fontWeight:"bold"
         
     },
     idcard: {
-        color: "grey",
+        color: "black",
         marginTop: 10,
-        fontSize: 12,
+        fontSize: 13,
         fontFamily:"Kanit"
     },
     information: {

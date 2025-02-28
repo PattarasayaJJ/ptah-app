@@ -6,6 +6,7 @@ import FooterMenu from '../components/Menus/FooterMenu';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import HomeMenu from '../components/Menus/HomeMenu';
 import { AuthContext } from '../context/authContext'
+import HeaderLogo from './HeaderLogo';
 
 
 
@@ -33,13 +34,15 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      
+
      
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         
-        <Text style={styles.hello}>สวัสดี {authState?.user.name} {authState?.user.surname}   </Text>
+        <Text style={styles.hello}>สวัสดี {authState?.user.name} {authState?.user.surname}    </Text>
         
        <Image source={require('../img/poster.png')} style={styles.img} />
 

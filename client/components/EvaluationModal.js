@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
-import Slider from "@react-native-community/slider"; // ต้องติดตั้งผ่าน npm หรือ yarn ก่อนใช้งาน
 
 const EvaluationModal = ({
   isVisible,
@@ -11,23 +10,18 @@ const EvaluationModal = ({
   subMissionLength,
   time,
 }) => {
-  const [sliderValue, setSliderValue] = useState(1); // เริ่มต้นที่ระดับ 1
+  const [selectedLevel, setSelectedLevel] = useState(1); // Default level
 
   const levels = [
-    { name: "ง่าย", color: "green" },
-    { name: "ปานกลาง", color: "yellow" },
-    { name: "ยาก", color: "red" },
+    { id: 1, name: "ง่าย", color: "#1DD345" },
+    { id: 2, name: "ปานกลาง", color: "#E88B00" },
+    { id: 3, name: "ยาก", color: "#FF6A6A" },
   ];
-  const getLevelLabel = (value) => {
-    if (value === 1) return "ง่าย";
-    if (value === 2) return "ปานกลาง";
-    if (value === 3) return "ยาก";
-    return "";
-  };
+
   const handleConfirm = () => {
-    const level = getLevelLabel(sliderValue);
-    onClose(); // ปิด Modal
-    onSelectLevel(level); // ส่งค่าระดับการประเมินกลับไปยังหน้าหลัก
+    const selected = levels.find((level) => level.id === selectedLevel)?.name;
+    onClose(); // Close modal
+    onSelectLevel(selected); // Send selected level back to the main screen
   };
 
   const formatTime = (seconds) => {
@@ -62,37 +56,44 @@ const EvaluationModal = ({
             : ""
         }`}</Text>
 
-        {/* Slider */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            width: "100%",
-          }}
-        >
-          {levels.map((value, idx) => (
-            <Text key={idx} style={[styles.levelLabel, { color: value.color }]}>
-              {value.name}
-            </Text>
-          ))}
+        {/* Radio buttons */}
+        <View style={styles.radioContainer}>
+        {levels.map((level) => (
+  <TouchableOpacity
+    key={level.id}
+    style={[styles.radioButton]}
+    onPress={() => setSelectedLevel(level.id)}
+  >
+    <View
+      style={[
+        styles.radioCircle,
+        {
+          borderColor: level.color, // Set border color dynamically
+        },
+        selectedLevel === level.id && {
+          backgroundColor: level.color, // Fill background when selected
+        },
+      ]}
+    />
+    <Text
+      style={[
+        styles.radioLabel,
+        { color: level.color, fontWeight: "normal" }, // Set text color dynamically and ensure no bold effect
+      ]}
+    >
+      {level.name}
+    </Text>
+  </TouchableOpacity>
+))}
+
+
         </View>
-        <Slider
-          style={styles.slider}
-          minimumValue={1}
-          maximumValue={3}
-          step={1}
-          value={sliderValue}
-          onValueChange={(value) => setSliderValue(value)}
-          minimumTrackTintColor="blue"
-          maximumTrackTintColor="gray"
-          thumbTintColor="blue"
-        />
 
         <Text style={styles.timeText}>
           เวลาที่ใช้ไป : {formatTime(time)} น.
         </Text>
 
-        {/* ปุ่มยืนยัน */}
+        {/* Confirm Button */}
         <Pressable style={styles.confirmButton} onPress={handleConfirm}>
           <Text style={styles.confirmButtonText}>ยืนยัน</Text>
         </Pressable>
@@ -109,44 +110,61 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 20,
+    padding: 25,
     alignItems: "center",
-    width: "90%",
+    width: "100%",
     shadowColor: "#000",
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#008cb7",
-    textDecorationLine: "underline",
-    marginBottom: 10,
+    fontSize: 20,
+    color: "#333",
+    marginBottom: 20,
+    fontFamily:"Kanit"
   },
   subtitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#008cb7",
+    color: "black",
     marginBottom: 5,
+    fontFamily:"Kanit"
+
   },
   description: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 15,
+    color: "black",
+    marginBottom: 20,
+    fontFamily:"Kanit"
+
+  },
+  radioContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
     marginBottom: 20,
   },
-  slider: {
-    width: "100%",
-    height: 40,
+  radioButton: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 12,
+    borderWidth: 1,
     marginBottom: 10,
   },
-  levelLabel: {
+  radioLabel: {
     fontSize: 16,
-    marginBottom: 10,
+    fontFamily:"Kanit",
+    fontWeight: "normal", // Ensure normal weight
+
+
   },
   confirmButton: {
-    backgroundColor: "#007aff",
-    borderRadius: 8,
+    backgroundColor: "#66C4FF",
+    borderRadius: 25,
     padding: 10,
     alignItems: "center",
     width: "100%",
@@ -157,21 +175,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  closeButton: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    padding: 10,
-    alignItems: "center",
-    width: "100%",
-  },
-  closeButtonText: {
-    color: "#333",
-    fontSize: 16,
-  },
   timeText: {
     fontSize: 14,
-    color: "#666",
+    color: "black",
     marginBottom: 20,
+    fontFamily:"Kanit"
+
   },
 });
 

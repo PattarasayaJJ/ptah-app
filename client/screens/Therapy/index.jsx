@@ -21,16 +21,29 @@ const Therapy = ({ navigation }) => {
 
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem(
-        `isSurvey_${authState.user._id}`
-      );
-
-      setIsSurvey(value != null || value === "yes" ? true : false);
+      // ตรวจสอบค่าใน AsyncStorage ก่อน
+      const localSurveyStatus = await AsyncStorage.getItem(`isSurvey_${authState.user._id}`);
+  
+      if (localSurveyStatus === "yes") {
+        setIsSurvey(true);
+        return;
+      }
+  
+      // ดึงข้อมูลจากเซิร์ฟเวอร์
+      const response = await axios.get(`/answer/user/${authState.user._id}/survey-status`);
+  
+      if (response.status === 200) {
+        setIsSurvey(response.data.isSurveyCompleted);
+        
+        if (response.data.isSurveyCompleted) {
+          await AsyncStorage.setItem(`isSurvey_${authState.user._id}`, "yes");
+        }
+      }
     } catch (e) {
-      // error reading value
-      console.log("error get data", e);
+      console.log("Error getting survey status:", e);
     }
   };
+  
 
   const handleGetQuestion = async () => {
     try {
@@ -53,15 +66,16 @@ const Therapy = ({ navigation }) => {
       console.log("error updating survey status", e);
     }
   };
+  
 
   return (
-    <LinearGradient
-      colors={["#FFFFFF", "#baefff"]} // ไล่สีจากฟ้าจางไปขาว
+    <View
+     
       style={styles.gradient}
     >
       <View>
         <View style={styles.container}>
-          <HeaderLogo></HeaderLogo>
+          
         </View>
         {isSurvey === null || !isSurvey ? (
           <SurveyScreen
@@ -73,12 +87,13 @@ const Therapy = ({ navigation }) => {
           <SuccessCardScreen navigation={navigation}></SuccessCardScreen>
         )}
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
+    backgroundColor:"white"
   },
   container: {
     marginTop: Platform.OS === "ios" ? 60 : 30,
@@ -92,12 +107,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#007AFF",
   },
-  image: {
-    width: 100,
-    height: 100,
-    resizeMode: "contain",
-    marginBottom: 20,
-  },
+  
   questionContainer: {
     marginBottom: 20,
     alignItems: "center",

@@ -14,13 +14,13 @@ const PostCard = ({ posts, myPostScreen }) => {
 
   // handle delete prompt
   const handleDeletePrompt = (id) => {
-    Alert.alert('ลบกระทู้', 'คุณต้องการลบกระทู้นี้ใช่หรือไม่', [
+    Alert.alert('ลบกระทู้', 'คุณต้องการลบกระทู้นี้ใช่หรือไม่?', [
       {
-        text: 'Cancel',
+        text: 'ยกเลิก',
         onPress: () => console.log('cancel press'),
       },
       {
-        text: 'Delete',
+        text: 'ลบ',
         onPress: () => handleDeletePost(id),
       },
     ]);

@@ -76,16 +76,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   questionText: {
-    fontSize: 22,
-    color: "#0096bd",
+    fontSize: 25,
+    color: "#333",
     textAlign: "center",
-    fontWeight: "bold",
+    fontFamily:"Kanit",
   },
   nextButton: {
     padding: 10,
     borderRadius: 25,
     width: 150,
-    backgroundColor: "#0096bd",
+    backgroundColor: "#66C4FF",
 
     alignSelf: "center",
     marginBottom: 20,
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+    fontFamily:"Kanit",
   },
 });
 

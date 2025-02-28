@@ -28,12 +28,14 @@ const Allblog = () => {
 
   return (
     <View style={styles.container}>
+       
     
 
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+        
 
         <TextInput
           style={styles.searchInput}
@@ -78,6 +80,15 @@ const styles = StyleSheet.create({
     top: 30,
     color:"#565656"
   
+  },
+  heading: {
+    fontSize: 20,
+    marginTop: 20,
+    fontFamily: "Kanit",
+    marginLeft:20,
+    borderLeftWidth:1,
+    padding:10,
+    borderColor:"#87CEFA"
   },
 
 });

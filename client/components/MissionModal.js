@@ -112,16 +112,19 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#008cb7",
+    fontSize: 22,
+    color: "#333",
     marginTop: 10,
     marginBottom: 10,
+    fontFamily:"Kanit"
+
   },
   subtitle: {
     fontSize: 16,
-    color: "#008cb7",
+    color: "#333",
     marginBottom: 10,
+    fontFamily:"Kanit"
+
   },
   image: {
     width: 160,
@@ -130,20 +133,24 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: "#008cb7",
+    color: "#333",
     marginBottom: 5,
+    fontFamily:"Kanit"
+
   },
   note: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#FF5733",
     marginBottom: 15,
+    fontFamily:"Kanit"
+
   },
   viewButton: {
     flexDirection: "row",
     justifyContent: "center",
   },
   skipButton: {
-    borderColor: "#008cb7",
+    borderColor: "#66C4FF",
     borderWidth: 1,
     width: width * 0.36,
     paddingVertical: 12,
@@ -153,7 +160,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   startButton: {
-    backgroundColor: "#008cb7",
+    backgroundColor: "#66C4FF",
     width: width * 0.36,
     paddingVertical: 12,
     paddingHorizontal: 40,
@@ -162,7 +169,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   skipButtonText: {
-    color: "#008cb7",
+    color: "#66C4FF",
     fontSize: 16,
     fontWeight: "bold",
   },

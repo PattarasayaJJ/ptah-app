@@ -105,7 +105,7 @@ const PostDetails = ({ route }) => {
                 <View style={styles.commentTextContainer}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text style={styles.commentInfo}>
-                      ตอบกลับโดย: {user.name}
+                    ตอบกลับโดย : {comment.postedBy?.name || 'ไม่ทราบชื่อ'}: 
                     </Text>
                     <Text style={styles.commentDate}>
                       {moment(comment.created).format('DD/MM/YYYY')}
@@ -123,7 +123,7 @@ const PostDetails = ({ route }) => {
                           <View style={styles.replyTextContainer}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                               <Text style={styles.replyInfo}>
-                                ตอบกลับโดย: {user.name}
+                              ตอบกลับโดย : {comment.postedBy?.name || 'ไม่ทราบชื่อ'}: 
                               </Text>
                               <Text style={styles.commentDate}>
                                 {moment(reply.created).format('DD/MM/YYYY')}

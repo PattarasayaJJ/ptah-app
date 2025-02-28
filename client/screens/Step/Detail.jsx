@@ -8,6 +8,7 @@ import {
   Dimensions,
   Image,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Video } from "expo-av";
@@ -35,11 +36,12 @@ const StepDetailScreen = ({ navigation, route }) => {
   const [answers, setAnswers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [evaluated, setEvaluated] = useState(false);
+  const [isImageModalVisible, setImageModalVisible] = useState(false);
 
   useEffect(() => {
     handleGetMissionDetail();
-    console.log("route", route);
   }, [route.params.id]);
+
   useEffect(() => {
     let timer = null;
 
@@ -86,8 +88,6 @@ const StepDetailScreen = ({ navigation, route }) => {
   const handleConditionNext = () => {
     if (maxSubMissionLength === subMissionLength + 1) {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
-        // call function send all evaluate
-
         if (route.params.isEvaluatedToday === 1) {
           navigation.goBack();
         } else {
@@ -108,7 +108,6 @@ const StepDetailScreen = ({ navigation, route }) => {
       }
     } else {
       if (missionDetail?.submissions[subMissionLength]?.evaluate) {
-        // open pop up evaluate
         if (evaluated) {
           toggleModal();
         } else {
@@ -121,13 +120,11 @@ const StepDetailScreen = ({ navigation, route }) => {
   };
 
   const toggleModal = () => {
-    setIsRunning((perv) => (perv ? false : true));
-    setModalVisible((perv) => (perv ? false : true));
+    setIsRunning((prev) => (prev ? false : true));
+    setModalVisible((prev) => (prev ? false : true));
   };
 
-  // รับค่าระดับการประเมินจาก Modal
   const handleSelectLevel = async (level) => {
-    console.log("ระดับที่เลือก:", level);
     const newAnswers = [
       ...answers,
       { name: missionDetail.submissions[subMissionLength].name, result: level },
@@ -138,7 +135,7 @@ const StepDetailScreen = ({ navigation, route }) => {
       setSubMissionLength((prev) => prev + 1);
     } else {
       await delay(500);
-      setIsRunning((perv) => (perv ? false : true));
+      setIsRunning((prev) => (prev ? false : true));
       setModalVisible2(true);
     }
   };
@@ -166,10 +163,7 @@ const StepDetailScreen = ({ navigation, route }) => {
   };
 
   return (
-    <LinearGradient
-      colors={["#FFFFFF", "#baefff"]} // ไล่สีจากฟ้าจางไปขาว
-      style={styles.gradient}
-    >
+    <LinearGradient colors={["#FFFFFF", "#baefff"]} style={styles.gradient}>
       <View style={{ marginBottom: 60 }}>
         <View style={styles.containerHeader}>
           <HeaderLogo />
@@ -247,19 +241,25 @@ const StepDetailScreen = ({ navigation, route }) => {
                         ? missionDetail?.submissions[subMissionLength]?.videoUrl
                         : "",
                     }}
-                    useNativeControls // Enables play/pause and other controls
-                    resizeMode="cover" // Adjusts how the video is scaled
-                    isLooping // Makes the video loop
+                    useNativeControls
+                    resizeMode="cover"
+                    isLooping
                   />
                 ) : (
-                  <Image
-                    style={[styles.video, { resizeMode: "contain" }]}
-                    source={{
-                      uri: missionDetail.submissions
-                        ? missionDetail?.submissions[subMissionLength]?.photoUrl
-                        : "",
-                    }}
-                  />
+                  <TouchableOpacity
+                    onPress={() => setImageModalVisible(true)}
+                  >
+                    <Image
+                      style={[styles.img]}
+                      source={{
+                        uri: missionDetail.submissions
+                          ? missionDetail?.submissions[
+                              subMissionLength
+                            ]?.photoUrl
+                          : "",
+                      }}
+                    />
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
@@ -292,6 +292,30 @@ const StepDetailScreen = ({ navigation, route }) => {
         onCloseSuccess={() => onCloseSuccess()}
         time={time}
       />
+      {/* Image Modal */}
+      <Modal
+        visible={isImageModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setImageModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setImageModalVisible(false)}
+          >
+            <FontAwesome5 name="times" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Image
+            style={styles.expandedImage}
+            source={{
+              uri: missionDetail.submissions
+                ? missionDetail?.submissions[subMissionLength]?.photoUrl
+                : "",
+            }}
+          />
+        </View>
+      </Modal>
     </LinearGradient>
   );
 };
@@ -311,25 +335,29 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: 10,
   },
-
   tabBtn: {
     width: 80,
     padding: 10,
     marginLeft: 10,
-    borderRadius: 14,
+    borderRadius: 7,
   },
   stepNumber: {
-    fontSize: 14,
-    fontWeight: "bold",
+    fontSize: 16,
     color: "#333",
     marginBottom: 20,
+    fontFamily: "Kanit",
   },
   video: {
     width: width * 0.9,
     height: height * 0.32,
     borderRadius: 10,
   },
-
+  img: {
+    width: width * 0.8,
+    height: height * 0.4,
+    borderRadius: 10,
+    alignSelf: "center",
+  },
   nextButton: {
     padding: 10,
     borderRadius: 25,
@@ -347,6 +375,27 @@ const styles = StyleSheet.create({
   },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { color: "#0096bd", fontSize: 16, marginTop: 10 },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 20,
+  },
+  expandedImage: {
+    width: width * 0.9,
+    height: height * 0.7,
+    resizeMode: "contain",
+    borderRadius: 10,
+  },
 });
 
 export default StepDetailScreen;

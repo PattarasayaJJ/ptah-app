@@ -1,5 +1,5 @@
 const express = require('express')
-const { signupController, signinController, updateUserController, requireSignIn  } = require('../controllers/userController')
+const { signupController, signinController, updateUserController, requireSignIn , leaderboardController  } = require('../controllers/userController')
 
 //router object
 const router = express.Router()
@@ -13,6 +13,9 @@ router.post('/signin' , signinController)
 
 //update || put
 router.put('/update-user', requireSignIn  , updateUserController)
+
+router.get("/leaderboard", leaderboardController);
+
 
 //export
 module.exports = router

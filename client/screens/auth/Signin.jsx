@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     width: 400,
     height: 80,
     marginTop: 130,
+    textAlign:"center"
   },
   linkText: {
     textAlign: "center",

@@ -10,6 +10,19 @@ const SurveyScreen = ({ navigation, questions, updateSurveyStatus }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [answers, setAnswers] = useState([]);
 
+
+  const getOptionColor = (optionName) => {
+    const greenOptions = ["มาก", "พร้อมแล้ว", "ดีขึ้นมาก"];
+    const orangeOptions = ["ปานกลาง", "ดีขึ้น"];
+    const redOptions = ["น้อย", "ยังไม่พร้อม","เฉยๆ"];
+
+    if (greenOptions.includes(optionName)) return "#ADFFBF";
+    if (orangeOptions.includes(optionName)) return "#FFCC7F";
+    if (redOptions.includes(optionName)) return "#FEA9A9";
+
+    return "#ffffff";
+  };
+
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
   };
@@ -17,48 +30,52 @@ const SurveyScreen = ({ navigation, questions, updateSurveyStatus }) => {
   const handleNext = () => {
     if (selectedOption !== null) {
       setAnswers([...answers, selectedOption]);
-
       setIdx((prev) => prev + 1);
-
-      // Navigate to the next screen or perform an action
+      setSelectedOption(null);  // รีเซ็ต selectedOption สำหรับคำถามถัดไป
     } else {
-      alert("Please select an option.");
+      alert("กรุณาเลือกคำตอบ");
     }
   };
 
   const handleSendAnswers = async () => {
+    if (!selectedOption) {
+      alert("กรุณาเลือกคำตอบ");
+      return;
+    }
+  
     const newAnswers = [...answers, selectedOption];
-
-    const data = {
-      userId: authState.user._id,
-      answers: newAnswers,
-    };
-
-    const response = await axios.post("/answer/send-answer", data);
-
-    if (response.status === 201) {
-      updateSurveyStatus();
+  
+    try {
+      const response = await axios.post("/answer/send-answer", {
+        userId: authState.user._id,
+        answers: newAnswers,
+      });
+  
+      if (response.status === 201) {
+        updateSurveyStatus();
+      }
+    } catch (error) {
+      console.error("Error submitting answers:", error);
+      alert("เกิดข้อผิดพลาด โปรดลองอีกครั้ง");
     }
   };
+  
 
   return (
     <View style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity
+
+   { /* <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={styles.backButton}
       >
         <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+      
 
       <View style={styles.cardQuestion}>
         {/* Header Image */}
-        <View style={{ marginLeft: -37 }}>
-          <Image
-            source={require("../../img/question.png")} // Replace with your image URL or local asset
-            style={styles.image}
-          />
-        </View>
+       
 
         {/* Question */}
         <View style={styles.questionContainer}>
@@ -69,14 +86,15 @@ const SurveyScreen = ({ navigation, questions, updateSurveyStatus }) => {
       {/* Options */}
       <View style={styles.optionsContainer}>
         {questions[idx]?.choice.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.optionButton,
-              //   selectedOption === index + 1 && styles.selectedOption,
-            ]}
-            onPress={() => handleOptionSelect(option)}
-          >
+       <TouchableOpacity
+       key={index}
+       style={[
+         styles.optionButton,
+         { backgroundColor: getOptionColor(option.name) },
+         selectedOption?.name === option.name && styles.selectedOption,
+       ]}
+       onPress={() => handleOptionSelect(option)}
+     >
             <Text style={styles.optionText}>{index + 1} </Text>
             <Text style={styles.optionText}>{option?.name}</Text>
             <FontAwesome5
@@ -117,24 +135,18 @@ const styles = StyleSheet.create({
   cardQuestion: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#b8eeff",
-    borderRadius: 20,
-    padding: 10,
+   
   },
-  image: {
-    width: 100,
-    height: 160,
-  },
+  
   questionContainer: {
-    marginRight: 20,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom:100,
+    marginTop:20
   },
   questionText: {
-    fontSize: 16,
+    fontSize: 25,
     color: "#333",
-    textAlign: "center",
-    fontWeight: "bold",
   },
   optionsContainer: {
     width: "100%",
@@ -142,7 +154,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   optionButton: {
-    backgroundColor: "#008cb7",
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
@@ -150,12 +161,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  selectedOption: {
-    backgroundColor: "#0E76A8",
-  },
+  
   optionText: {
     fontSize: 16,
-    color: "white",
+    color: "black",
   },
   nextButton: {
     padding: 10,

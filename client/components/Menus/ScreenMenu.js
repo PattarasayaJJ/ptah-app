@@ -22,7 +22,9 @@ import StepScreen from "../../screens/Step";
 import StepDetailScreen from "../../screens/Step/Detail.jsx";
 import TherapyFeedback from "../../screens/TherapyFeedback.jsx";
 import Resultstherapy from "../../screens/Resultstherapy.jsx";
-import CalendarScreen from "../../screens/CalendarScreen.jsx";
+import LeaderboardScreen from "../../screens/LeaderboardScreen.jsx";
+import TherapyFeedbackDetail from "../../screens/TherapyFeedbackDetail.jsx"
+
 
 const ScreenMenu = () => {
   const navigation = useNavigation();
@@ -45,14 +47,15 @@ const ScreenMenu = () => {
             options={{
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center", // Align the title to the center
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
               headerRight: () => (
                 <TouchableOpacity
                   onPress={() => navigation.navigate("Notification")}
                 >
                   <FontAwesome5
                     name="bell"
-                    size={24}
-                    color="black"
+                    size={25}
+                    color="#87CEFA"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -67,6 +70,8 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
 
@@ -77,6 +82,8 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
 
@@ -87,6 +94,8 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
 
@@ -97,6 +106,8 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
           <Stack.Screen
@@ -106,6 +117,8 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
 
@@ -116,6 +129,8 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
 
@@ -126,26 +141,30 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
           <Stack.Screen
             name="Therapy"
             component={Therapy}
             options={{
-              headerShown: false,
-              //   headerBackTitle: "Back",
-              //   headerTitle: (props) => <HeaderLogo {...props} />,
-              //   headerTitleAlign: "center",
+              
+                headerBackTitle: "Back",
+               headerTitle: (props) => <HeaderLogo {...props} />,
+               headerTitleAlign: "center",
+               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
           <Stack.Screen
             name="Step"
             component={StepScreen}
             options={{
-              headerShown: false,
-              //   headerBackTitle: "Back",
-              //   headerTitle: (props) => <HeaderLogo {...props} />,
-              //   headerTitleAlign: "center",
+              headerBackTitle: "Back",
+              headerTitle: (props) => <HeaderLogo {...props} />,
+              headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
             }}
           />
           <Stack.Screen
@@ -166,6 +185,19 @@ const ScreenMenu = () => {
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
+            }}
+          />
+             <Stack.Screen
+            name="TherapyFeedbackDetail"
+            component={TherapyFeedbackDetail}
+            options={{
+              headerBackTitle: "Back",
+              headerTitle: (props) => <HeaderLogo {...props} />,
+              headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
 
@@ -173,20 +205,22 @@ const ScreenMenu = () => {
             name="Resultstherapy"
             component={Resultstherapy}
             options={{
-              headerShown: false,
-              // headerBackTitle: "Back",
-              // headerTitle: (props) => <HeaderLogo {...props} />,
-              // headerTitleAlign: "center",
+              headerBackTitle: "Back",
+              headerTitle: (props) => <HeaderLogo {...props} />,
+              headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
             }}
           />
 
           <Stack.Screen
-            name="CalendarScreen"
-            component={CalendarScreen}
+            name="LeaderboardScreen"
+            component={LeaderboardScreen}
             options={{
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
             }}
           />
         </>

@@ -9,22 +9,23 @@ import {
   TextInput,
   FlatList,
   Alert,
+  Image,
+  KeyboardAvoidingView,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "../context/authContext";
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import "moment/locale/th";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import axios from "axios";
 import StarModal from "../components/StarModal";
-import HeaderLogo from "./HeaderLogo";
 
-moment.locale("th");
+// นำเข้า locale ภาษาไทย
+import "moment/locale/th";
+
+moment.locale("th"); // ตั้งค่า locale ภาษาไทย
 
 const Resultstherapy = ({ navigation, route }) => {
-  const params = route?.params || {}; // ป้องกัน undefined
+  const params = route?.params || {};
   const {
     answers = [],
     missionId = "",
@@ -51,23 +52,21 @@ const Resultstherapy = ({ navigation, route }) => {
     );
 
     const arrValue = jsonValue != null ? JSON.parse(jsonValue) : [];
-
     const timeAsyncValue =
       time !== 0 ? time : timeValue != null ? Number(timeValue) : 0;
-
-    console.log("arrValue", arrValue);
 
     setexerciseResults([...arrValue, ...answers]);
     setTime(timeAsyncValue);
   };
+
   const getLevelColor = (level) => {
     switch (level) {
       case "ง่าย":
-        return "green";
+        return "#1DD345";
       case "ปานกลาง":
-        return "orange";
+        return "#E88B00";
       case "ยาก":
-        return "red";
+        return "#FF6A6A";
       default:
         return "black";
     }
@@ -96,13 +95,18 @@ const Resultstherapy = ({ navigation, route }) => {
   };
 
   const handleSendAnswer = async () => {
+    if (doctorMessage.trim() === "" && missionsToEvaluate.length === 0) {
+      Alert.alert("ข้อผิดพลาด", "กรุณากรอกข้อความถึงแพทย์");
+      return;
+    }
+
     try {
       const data = {
         userId: authState.user._id,
         missionId: missionId,
         answers: answers,
         suggestion: doctorMessage,
-        timeSpent: formatTime(time),
+        timeSpent: formatTime(resultTime),
       };
 
       const response = await axios.post(
@@ -120,15 +124,14 @@ const Resultstherapy = ({ navigation, route }) => {
 
         await AsyncStorage.setItem(
           `time_${currentDate}_${authState.user._id}`,
-          `${time}`
+          `${resultTime}`
         );
-        if (route.params.missionsToEvaluate.length === 0) {
-          //
+
+        if (missionsToEvaluate.length === 0) {
           checkAllEvaluates();
         } else {
-          let missionsToEvaluate = route.params.missionsToEvaluate;
+          let missionsToEvaluate = [...route.params.missionsToEvaluate];
           const id = missionsToEvaluate.shift();
-          // navigation.goBack();
           navigation.navigate("StepDetail", {
             id: id,
             missionsToEvaluate,
@@ -137,15 +140,16 @@ const Resultstherapy = ({ navigation, route }) => {
       }
     } catch (error) {
       console.log("err", error);
-      Alert.alert("ขออภัย", "คุณสามารถทำการประเมินได้เพียงครั้งเดียวต่อวัน");
+      Alert.alert(
+        "ขออภัย",
+        "คุณสามารถทำการประเมินได้เพียงครั้งเดียวต่อวัน"
+      );
     }
   };
 
   const checkAllEvaluates = async () => {
     try {
-      // เรียก API
       const response = await axios.get("/mission/check/daily-mission/add-star");
-
       if (response.status === 200) {
         setModalVisible(true);
       }
@@ -155,117 +159,108 @@ const Resultstherapy = ({ navigation, route }) => {
   };
 
   return (
-    <LinearGradient
-      colors={["#FFFFFF", "#baefff"]} // ไล่สีจากฟ้าจางไปขาว
+    <KeyboardAvoidingView
       style={styles.gradient}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={{ marginBottom: 60 }}>
-        <View style={styles.containerHeader}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
-          </TouchableOpacity>
-          <HeaderLogo />
-          <View style={{ marginRight: 30 }} />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.heading}>ผลการกายภาพบำบัด</Text>
+          <Text style={styles.date}>
+            วันที่ {moment().add(543, "year").format("D MMMM YYYY")}
+          </Text>
         </View>
-        <View style={{ flexDirection: "row", marginLeft: 12, marginTop: 12 }}>
-          <View
-            style={{
-              borderWidth: 1.5,
-              borderColor: "#6bdbfc",
-              marginRight: 12,
-            }}
-          ></View>
-          <View style={{ flexDirection: "column" }}>
-            <Text style={styles.title}>ผลการกายภาพบำบัด</Text>
-            <Text style={styles.date}>
-              วันที่ {moment().add(543, "year").format("DD MMMM YYYY")}
-            </Text>
-          </View>
-        </View>
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.card}>
-            <Text style={[styles.date, { fontSize: 12 }]}>
-              ระยะเวลาในการทำกายภาพ {formatTime(resultTime)} นาที
-            </Text>
-            <FlatList
-              data={exerciseResults}
-              renderItem={renderItem}
-              keyExtractor={(item, index) => `exercise-${index}`}
-              style={styles.resultList}
-              ListEmptyComponent={() => (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>ไม่มีข้อมูลที่จะแสดง</Text>
-                </View>
-              )}
-            />
-          </View>
-          {missionsToEvaluate.length === 0 && (
-            <>
-              <Text style={styles.label}>ข้อความถึงแพทย์:</Text>
-              <TextInput
-                style={styles.input}
-                value={doctorMessage}
-                onChangeText={(text) => setDoctorMessage(text)}
-                multiline
-              />
-            </>
-          )}
 
-          {answers.length > 0 && (
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={() => handleSendAnswer()}
-            >
-              <Text style={styles.submitButtonText}>
-                {missionsToEvaluate.length === 0
-                  ? "ส่งแบบประเมิน"
-                  : "บันทึกประเมิน"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </ScrollView>
-      </View>
-      <StarModal
-        isVisible={isModalVisible}
-        onCloseSuccess={() => {
-          setModalVisible(false);
-          navigation.navigate("Step");
-        }}
-      />
-    </LinearGradient>
+        <View style={styles.card}>
+          <Text style={styles.time}>
+            ระยะเวลาในการทำกายภาพ {formatTime(resultTime)} นาที
+          </Text>
+          <FlatList
+            data={exerciseResults}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => `exercise-${index}`}
+            style={styles.resultList}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  ท่านยังไม่ได้ประเมินผลกายภาพบำบัด
+                </Text>
+                <Image
+                  source={require("../img/emo.png")}
+                  style={styles.image}
+                />
+              </View>
+            )}
+          />
+        </View>
+
+        {answers.length > 0 && (
+          <>
+            <Text style={styles.label}>ข้อความถึงแพทย์:</Text>
+            <TextInput
+              style={styles.input}
+              value={doctorMessage}
+              onChangeText={(text) => setDoctorMessage(text)}
+              multiline
+            />
+          </>
+        )}
+
+        {answers.length > 0 && (
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleSendAnswer}
+          >
+            <Text style={styles.submitButtonText}>
+              {missionsToEvaluate.length === 0
+                ? "ส่งแบบประเมิน"
+                : "บันทึกประเมิน"}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <StarModal
+          isVisible={isModalVisible}
+          onCloseSuccess={() => {
+            setModalVisible(false);
+            navigation.navigate("Step");
+          }}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
+    backgroundColor: "white",
   },
-  containerHeader: {
-    marginTop: Platform.OS === "ios" ? 60 : 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
-  container: {
-    paddingVertical: 20,
-    padding: 12,
-  },
-  backButton: {
-    marginLeft: 10,
-    marginTop: 6,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
+  heading: {
+    fontSize: 24,
+    marginTop: 20,
+    fontFamily: "Kanit",
+    marginLeft: 20,
+    borderLeftWidth: 3,
+    paddingLeft: 10,
+    borderColor: "#87CEFA",
     color: "#333",
-    textAlign: "center",
     marginBottom: 5,
   },
   date: {
-    fontSize: 16,
-    color: "#C0C0C0",
+    fontSize: 18,
+    fontFamily: "Kanit",
+    paddingLeft: 30,
+    marginBottom: 15,
   },
   card: {
     backgroundColor: "white",
@@ -276,6 +271,13 @@ const styles = StyleSheet.create({
     elevation: 2,
     padding: 14,
     marginBottom: 20,
+    marginHorizontal: 16,
+  },
+  time: {
+    color: "#333",
+    fontFamily: "Kanit",
+    textAlign: "center",
+    marginBottom: 15,
   },
   resultList: {
     marginBottom: 20,
@@ -289,18 +291,19 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 16,
     color: "#333",
-    flex: 1,
+    fontFamily: "Kanit",
   },
   levelText: {
     fontSize: 16,
-    fontWeight: "bold",
     textAlign: "right",
     marginLeft: 10,
+    fontFamily: "Kanit",
   },
   label: {
     fontSize: 16,
     color: "#333",
     marginBottom: 5,
+    marginHorizontal: 16,
   },
   input: {
     backgroundColor: "#fff",
@@ -311,14 +314,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     marginBottom: 20,
+    marginHorizontal: 16,
   },
   submitButton: {
-    backgroundColor: "#008cb7",
+    backgroundColor: "#66C4FF",
     borderRadius: 24,
     paddingVertical: 12,
     alignItems: "center",
     alignSelf: "center",
     marginTop: 20,
+    marginBottom: 20,
     width: "40%",
   },
   submitButtonText: {
@@ -333,8 +338,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#888",
+    fontFamily: "Kanit",
+  },
+  image: {
+    width: 300,
+    height: 300,
   },
 });
 

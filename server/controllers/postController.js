@@ -57,11 +57,11 @@ const getAllpostController = async (req, res) => {
 // Get User Posts
 const getUserPostsController = async (req, res) => {
   try {
-    const posts = await postModel.find({ postedBy: req.auth._id }).sort({ createdAt: -1 });
+    const userPosts = await postModel.find({ postedBy: req.auth._id }).sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
       message: "User posts retrieved successfully",
-      posts,
+      userPosts, // เปลี่ยนจาก posts เป็น userPosts
     });
   } catch (error) {
     console.error("Error in get user posts:", error);
@@ -72,6 +72,7 @@ const getUserPostsController = async (req, res) => {
     });
   }
 };
+
 
 // Delete Post
 const deletePostController = async (req, res) => {
@@ -242,9 +243,11 @@ const addReplyController = async (req, res) => {
 
     await post.save();
 
-    const updatedPost = await postModel
-      .findById(postId)
-      .populate('comments.replies.postedBy', 'name email'); // populate หลังการบันทึก
+    const updatedPost = await postModel.findById(postId).populate([
+      { path: 'comments.postedBy', select: 'name' },
+      { path: 'comments.replies.postedBy', select: 'name' },
+    ]);
+    
 
     res.status(200).send({
       success: true,

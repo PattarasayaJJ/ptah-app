@@ -17,7 +17,6 @@ const HomeMenu = () => {
 <View style={styles.menuWrapper}>
                 
                 
-    <Text style={{marginLeft:10, marginTop:10, fontWeight:"600" , borderLeftWidth:1 ,padding:10 ,borderColor:"#87CEFA" ,fontFamily:"Kanit" , fontSize: 18}}>หมวดหมู่</Text>
       <View style={styles.row}>
         <TouchableOpacity  onPress={() => navigation.navigate('Therapy')}>
         <View style={styles.menuItem}>
@@ -38,14 +37,14 @@ const HomeMenu = () => {
         <TouchableOpacity onPress={() => navigation.navigate('TherapyFeedback')}>
         <View style={styles.menuItem}>
           <Image source={require('../../img/icons/form.png')} style={styles.iconStyle} />
-          <Text style={styles.menuItemText}>ผลประเมิน</Text>
+          <Text style={styles.menuItemText}>ผลการประเมิน</Text>
           </View>
         </TouchableOpacity>
       
-        <TouchableOpacity onPress={() => navigation.navigate('CalendarScreen')}>
+        <TouchableOpacity onPress={() => navigation.navigate('LeaderboardScreen')}>
         <View style={styles.menuItem}>
-            <Image source={require('../../img/icons/mood.png')} style={styles.iconStyle} />
-          <Text style={styles.menuItemText}>อารมณ์ประจำวัน</Text>
+            <Image source={require('../../img/icons/star.png')} style={styles.iconStyle} />
+          <Text style={styles.menuItemText}>อันดับดาวประจำวัน</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -71,8 +70,8 @@ const styles  = StyleSheet.create({
   },
 
   iconStyle: {
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 30,
    
   },
  
@@ -87,7 +86,7 @@ const styles  = StyleSheet.create({
     borderRadius:15,
     alignItems:"center",
     padding:15,
-    margin:4,
+    margin:5,
     shadowColor: "#000",
     shadowOffset: {
         width: 0,
@@ -101,7 +100,7 @@ const styles  = StyleSheet.create({
         color: 'black',
         marginLeft: 10,
         fontSize: 14,
-        fontFamily:"Kanit"
+        fontFamily:"Kanit",
         
         
         

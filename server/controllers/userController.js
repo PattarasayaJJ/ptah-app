@@ -97,7 +97,7 @@ const signinController = async (req, res) => {
     if (user.physicalTherapy === false) {
       return res.status(403).send({
         success: false,
-        message: "This account is not authorized to sign in",
+        message: "บัญชีนี้ไม่มีสิทธ์เข้าใช้งานPTAH Applicaion",
       });
     }
 
@@ -194,9 +194,36 @@ const updateUserController = async (req, res) => {
   }
 };
 
+const leaderboardController = async (req, res) => {
+  try {
+    const users = await userModel
+      .find({ physicalTherapy: true })
+      .sort({ stars: -1, lastStarredAt: -1 })
+      .select("_id name surname stars"); // เพิ่ม _id ใน select
+
+    res.status(200).json({
+      success: true,
+      leaderboard: users.map(user => ({
+        id: user._id, // เปลี่ยน _id เป็น id
+        name: user.name,
+        surname: user.surname,
+        stars: user.stars,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    res.status(500).json({ success: false, message: "Error fetching leaderboard", error: error.message });
+  }
+};
+
+
+
+
+
 module.exports = {
   signupController,
   signinController,
   updateUserController,
   requireSignIn,
+  leaderboardController
 };
