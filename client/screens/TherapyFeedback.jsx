@@ -101,6 +101,12 @@ const TherapyFeedback = () => {
               <Text style={styles.cardText}>
                 ข้อความจากแพทย์: {feedback.doctor_response}
               </Text>
+             <Text style={styles.cardText}>
+  ประเมินโดย : {feedback.doctor_id
+    ? `${feedback.doctor_id.nametitle || ''} ${feedback.doctor_id.name || ''} ${feedback.doctor_id.surname || ''}`
+    : "ไม่ทราบชื่อแพทย์"}
+</Text>
+
               <Text style={styles.responseDate}>
                 ตอบกลับเมื่อ: {formatThaiDateWithTime(feedback.createdAt)}
               </Text>

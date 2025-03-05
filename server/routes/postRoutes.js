@@ -9,6 +9,7 @@ const {
   addCommentController,
   deleteCommentController,
   addReplyController,
+  deleteReplyController
 } = require('../controllers/postController');
 
 const router = express.Router();
@@ -21,5 +22,7 @@ router.put('/update-post/:id', requireSignIn, updatePostController);
 router.post('/add-comment/:postId', requireSignIn, addCommentController);
 router.delete('/delete-comment/:postId/:commentId', requireSignIn, deleteCommentController);
 router.post('/:postId/add-reply/:commentId', requireSignIn, addReplyController);
+
+router.delete('/posts/:postId/comments/:commentId/replies/:replyId', requireSignIn, deleteReplyController);
 
 module.exports = router;

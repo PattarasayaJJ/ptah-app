@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
-
+const mongoose = require("mongoose");
 const feedbackModel = require("../models/feedbackModel");
+const MPersonnel = require("../models/mpersonnelModel"); 
+
 
 // บันทึก Feedback
 const saveFeedback = async (req, res) => {
   try {
-    const { user_id, doctor_response, feedback_type, evaluation_date } = req.body;
+    const { user_id, doctor_response, feedback_type, evaluation_date, doctor_id } = req.body;
 
-    if (!user_id || !doctor_response || !feedback_type || !evaluation_date) {
+    if (!user_id || !doctor_response || !feedback_type || !evaluation_date || !doctor_id) {
       return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
 
@@ -16,6 +17,7 @@ const saveFeedback = async (req, res) => {
       doctor_response,
       feedback_type,
       evaluation_date,
+      doctor_id,
     });
 
     await newFeedback.save();
@@ -25,7 +27,7 @@ const saveFeedback = async (req, res) => {
   }
 };
 
-// ดึง Feedback ตาม user_id
+// ดึง Feedback ตาม user_id พร้อมข้อมูลแพทย์
 const getAllFeedbacksByUserId = async (req, res) => {
   try {
     const userId = req.query.user_id;
@@ -34,7 +36,14 @@ const getAllFeedbacksByUserId = async (req, res) => {
       return res.status(400).json({ error: "กรุณาระบุ user_id" });
     }
 
-    const feedbacks = await feedbackModel.find({ user_id: userId });
+    const feedbacks = await feedbackModel
+      .find({ user_id: userId })
+      .populate({
+        path: "doctor_id", 
+        model: "MPersonnel",  // ✅ ระบุโมเดลให้แน่ชัด
+        select: "nametitle name surname",
+      })
+      .lean(); // ✅ ใช้ lean() เพื่อให้ได้ JSON ที่ง่ายขึ้น
 
     if (!feedbacks.length) {
       return res.status(404).json({ message: "ไม่พบ Feedback ของผู้ใช้ในระบบ" });
@@ -43,14 +52,20 @@ const getAllFeedbacksByUserId = async (req, res) => {
     res.status(200).json(feedbacks);
   } catch (error) {
     console.error("Error fetching feedbacks:", error.message);
-    res.status(500).json({ message: "Failed to fetch feedbacks", error });
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล", error });
   }
 };
 
-// ดึง Feedback ทั้งหมด
+
+// ดึง Feedback ทั้งหมด พร้อมข้อมูลแพทย์
 const getAllFeedbacks = async (req, res) => {
   try {
-    const feedbacks = await feedbackModel.find();
+    const feedbacks = await feedbackModel
+      .find()
+      .populate({
+        path: "doctor_id", 
+        select: "nametitle name surname",
+      });
 
     if (!feedbacks.length) {
       return res.status(404).json({ message: "ไม่พบ Feedback ใดๆ ในฐานข้อมูล" });
@@ -72,7 +87,12 @@ const getFeedbackByDateAndId = async (req, res) => {
       return res.status(400).json({ error: "กรุณาระบุ ID และวันที่" });
     }
 
-    const feedbacks = await feedbackModel.find({ user_id: id, evaluation_date: date });
+    const feedbacks = await feedbackModel
+      .find({ user_id: id, evaluation_date: date })
+      .populate({
+        path: "doctor_id", // ✅ ใช้ doctor_id แทน createdBy
+        select: "nametitle name surname",
+      });
 
     if (feedbacks.length === 0) {
       return res.status(404).json({ message: "ไม่พบข้อมูล Feedback ในวันนี้" });
@@ -85,4 +105,3 @@ const getFeedbackByDateAndId = async (req, res) => {
 };
 
 module.exports = { saveFeedback, getAllFeedbacks, getAllFeedbacksByUserId, getFeedbackByDateAndId };
-

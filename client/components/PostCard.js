@@ -126,16 +126,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center', 
   },
   title: {
-    fontSize: 17,
-    paddingBottom: 5,
-    borderBottomWidth: 0.3,
-    fontFamily: "Kanit"
+    fontSize: 20,
+    paddingBottom: 7,
+    borderBottomWidth: 3,
+    borderColor:"lightgrey",
+    fontFamily: "Kanit",
+    color: '#333',
   },
   content: {
-    color: 'grey',
+    color: '#333',
     marginTop: 10,
     marginBottom: 5,
-    fontFamily: "Kanit"
+    fontFamily: "Kanit",
+    fontSize: 16,
+
   },
   tagContainer: {
     flexDirection: 'row',

@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     fontFamily: "Kanit",
   },
   postBtn: {
-    backgroundColor: "white",
+    backgroundColor: "#87CEFA",
     width: 200,
     height: 45,
     borderRadius: 30,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   postBtnText: {
-    color: "#87CEFA",
+    color: "white",
     fontWeight: "600",
     fontFamily: "Kanit",
   },

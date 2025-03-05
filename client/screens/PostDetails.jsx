@@ -85,6 +85,104 @@ const PostDetails = ({ route }) => {
     setCommentText('');
   };
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const storedAuth = await AsyncStorage.getItem('@auth');
+      const authData = JSON.parse(storedAuth);
+      const token = authData?.token;
+  
+      if (!token) {
+        Alert.alert('Error', 'ไม่พบโทเค็นการอนุญาต');
+        return;
+      }
+  
+      const response = await fetch(`http://10.0.2.2:8080/api/v1/post/delete-comment/${post._id}/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const responseText = await response.text();
+      console.log(responseText);
+  
+      if (!response.ok) {
+        try {
+          const errorData = JSON.parse(responseText);
+          console.error('Error Response:', errorData);
+          throw new Error(errorData.message || 'Failed to delete comment');
+        } catch (error) {
+          console.error('Non-JSON response received:', error);
+          throw new Error('Failed to delete comment, non-JSON response');
+        }
+      }
+  
+      try {
+        const responseData = JSON.parse(responseText);
+        setComments(responseData.post.comments);
+      } catch (error) {
+        console.error('Error parsing response:', error);
+        Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบความคิดเห็น');
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบความคิดเห็น');
+    }
+  };
+  
+  const handleDeleteReply = async (commentId, replyId) => {
+    try {
+      const storedAuth = await AsyncStorage.getItem('@auth');
+      const authData = JSON.parse(storedAuth);
+      const token = authData?.token;
+  
+      if (!token) {
+        Alert.alert('Error', 'ไม่พบโทเค็นการอนุญาต');
+        return;
+      }
+  
+      const response = await fetch(
+        `http://10.0.2.2:8080/api/v1/posts/${post._id}/comments/${commentId}/replies/${replyId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      console.log(`Request URL: ${response.url}`);
+      console.log(`HTTP Status: ${response.status}`);
+  
+      const responseText = await response.text();
+      console.log(`Response Text: ${responseText}`);
+  
+      if (!response.ok) {
+        try {
+          const errorData = JSON.parse(responseText);
+          console.error('Error Response:', errorData);
+          throw new Error(errorData.message || 'Failed to delete reply');
+        } catch (parseError) {
+          console.error('Non-JSON response received:', parseError);
+          throw new Error('Failed to delete reply, non-JSON response');
+        }
+      }
+  
+      try {
+        const responseData = JSON.parse(responseText);
+        setComments(responseData.comments);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบการตอบกลับ');
+      }
+    } catch (error) {
+      console.error('Error deleting reply:', error);
+      Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบการตอบกลับ');
+    }
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <ScrollView>
@@ -101,17 +199,31 @@ const PostDetails = ({ route }) => {
           {comments.map((comment, index) => (
             <View key={index} style={styles.comment}>
               <View style={styles.commentContent}>
-                <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.avatar} />
                 <View style={styles.commentTextContainer}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={styles.commentInfo}>
-                    ตอบกลับโดย : {comment.postedBy?.name || 'ไม่ทราบชื่อ'}: 
-                    </Text>
+                  <Text style={styles.commentInfo}>
+  ตอบกลับโดย : 
+  {comment.postedByUser?.name ||
+    (comment.postedByPersonnel
+      ? `${comment.postedByPersonnel.nametitle}${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
+      : 'ไม่ทราบชื่อ')}
+</Text>
+
                     <Text style={styles.commentDate}>
                       {moment(comment.created).format('DD/MM/YYYY')}
                     </Text>
                   </View>
                   <Text style={styles.commentText}>{comment.text}</Text>
+                  {(comment.postedByUser?.id === userId || comment.postedByPersonnel?.id === userId) && (
+    <TouchableOpacity
+        onPress={() => handleDeleteComment(comment._id)}
+        style={styles.deleteButton}
+    >
+        <Text style={styles.deleteButtonText}>ลบ</Text>
+    </TouchableOpacity>
+)}
+
+
                   <TouchableOpacity onPress={() => handleReply(comment._id)} style={styles.replyButton}>
                     <Text style={styles.replyButtonText}>ตอบกลับ</Text>
                   </TouchableOpacity>
@@ -119,17 +231,30 @@ const PostDetails = ({ route }) => {
                     comment.replies.map((reply, replyIndex) => (
                       <View key={replyIndex} style={styles.reply}>
                         <View style={styles.replyContent}>
-                          <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.avatar} />
                           <View style={styles.replyTextContainer}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Text style={styles.replyInfo}>
-                              ตอบกลับโดย : {comment.postedBy?.name || 'ไม่ทราบชื่อ'}: 
-                              </Text>
+                            <Text style={styles.replyInfo}>
+  ตอบกลับโดย : 
+  {reply.postedByUser?.name ||
+    (reply.postedByPersonnel
+      ? `${reply.postedByPersonnel.nametitle} ${reply.postedByPersonnel.name} ${reply.postedByPersonnel.surname}`
+      : 'ไม่ทราบชื่อ')}
+</Text>
+
                               <Text style={styles.commentDate}>
                                 {moment(reply.created).format('DD/MM/YYYY')}
                               </Text>
                             </View>
                             <Text style={styles.replyText}>{reply.text}</Text>
+                            {(comment.postedByUser?.id === userId || comment.postedByPersonnel?.id === userId) && (
+    <TouchableOpacity
+        onPress={() => handleDeleteComment(comment._id)}
+        style={styles.deleteButton}
+    >
+        <Text style={styles.deleteButtonText}>ลบ</Text>
+    </TouchableOpacity>
+)}
+
                             <TouchableOpacity onPress={() => handleReply(comment._id)} style={styles.replyButton}>
                               <Text style={styles.replyButtonText}>ตอบกลับ</Text>
                             </TouchableOpacity>
@@ -168,7 +293,6 @@ const PostDetails = ({ route }) => {
     </KeyboardAvoidingView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -177,7 +301,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: 'white',
-    borderRadius: 5,
+    borderRadius: 7,
     borderWidth: 0.2,
     borderColor: '#C7C7C7',
     padding: 15,
@@ -189,17 +313,22 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   title: {
-    fontSize: 17,
-    paddingBottom: 5,
-    borderBottomWidth: 0.3,
+    fontSize: 20,
+    paddingBottom: 7,
+    borderBottomWidth: 3,
+    borderColor:"lightgrey",
     fontFamily: "Kanit",
-    fontWeight: 'bold'
+    color: '#333',
+
   },
   description: {
-    color: 'grey',
-    marginTop: 10,
+    color: '#333',
+    marginTop: 12,
     marginBottom: 5,
-    fontFamily: "Kanit"
+    fontFamily: "Kanit",
+    fontSize: 16,
+
+
   },
   tag: {
     color: '#87CEFA',
@@ -211,7 +340,7 @@ const styles = StyleSheet.create({
   commentsTitle: {
     fontSize: 15,
     marginBottom: 5,
-    color: '#404040',
+    color: '#333',
     marginTop: 10
   },
   commentsContainer: {
@@ -238,7 +367,7 @@ const styles = StyleSheet.create({
   },
   commentText: {
     fontFamily: "Kanit",
-    color: "#404040",
+    color: "#333",
   },
   commentInfo: {
     color: 'grey',
@@ -313,6 +442,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 1,
     marginBottom: 10
+  },
+   deleteButton: {
+    marginTop: 5,
+    alignSelf: 'flex-end',
+  },
+  deleteButtonText: {
+    color: 'red',
+    fontFamily: "Kanit",
   },
 });
 
