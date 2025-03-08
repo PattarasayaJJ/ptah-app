@@ -2,6 +2,7 @@ const JWT = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 const { hashPassword, comparePassword } = require("../helpers/authHelper");
 var { expressjwt: jwt } = require("express-jwt");
+const { sendEmail } = require("../services/mailer"); // Correct the import statement
 
 // Middleware
 const requireSignIn = jwt({
@@ -216,14 +217,45 @@ const leaderboardController = async (req, res) => {
   }
 };
 
+const forgetPasswordController = async (req, res) => {
+  try {
+    const { ID_card_number } = req.body;
 
+    // Find user by username
+    const user = await userModel.findOne({ ID_card_number });
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+ 
+    // Log user information
+    // console.log("User found:", user);
 
-
+    await sendEmail(
+      user.email, 
+      "การรีเซ็ตรหัสผ่าน",
+      "ทดสอบ" 
+    );
+  
+    res.status(200).json({ msg: "Password reset email sent" });
+  
+  } catch (error) {
+    console.error("Error in forgetPasswordController:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in forget password API",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
   signupController,
   signinController,
   updateUserController,
   requireSignIn,
-  leaderboardController
+  leaderboardController,
+  forgetPasswordController, 
 };
