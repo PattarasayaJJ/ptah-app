@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const mpersonnelSchema = new mongoose.Schema(
     {
         nametitle: {
-            type: [String], // ใช้ Array ของ String ถ้าข้อมูลจะเป็นลักษณะนี้
+            type: [String],
             required: true,
-            enum: ['นพ', 'พญ', 'อื่นๆ'], // ถ้าต้องการจำกัดค่า
+            enum: ['นพ', 'พญ', 'อื่นๆ'], 
           },
         
         name: String,

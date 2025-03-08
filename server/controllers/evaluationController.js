@@ -31,7 +31,7 @@ const getEvaluationController = async (req, res) => {
         });
 
         if (!evaluations.length) {
-            return res.status(404).send({ success: false, message: "No evaluations found" });
+            return res.status(404).send({ success: false, message: "ไม่พบการะประเมินในวันนี้จากผู้ป่วย" });
         }
 
         res.status(200).send(evaluations); // ✅ ส่งกลับข้อมูลทั้งหมดเป็น array

@@ -4,16 +4,16 @@ const mongoose = require('mongoose');
 const replySchema = new mongoose.Schema({
   text: { type: String, required: true },
   created: { type: Date, default: Date.now },
-  postedByUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // อ้างอิงถึง User
-  postedByPersonnel: { type: mongoose.Schema.Types.ObjectId, ref: 'MPersonnel' }, // อ้างอิงถึง MPersonnel
+  postedByUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+  postedByPersonnel: { type: mongoose.Schema.Types.ObjectId, ref: 'MPersonnel' }, 
 });
 
 // Comment Schema
 const commentSchema = new mongoose.Schema({
   text: { type: String, required: true },
   created: { type: Date, default: Date.now },
-  postedByUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // อ้างอิงถึง User
-  postedByPersonnel: { type: mongoose.Schema.Types.ObjectId, ref: 'MPersonnel' }, // อ้างอิงถึง MPersonnel
+  postedByUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+  postedByPersonnel: { type: mongoose.Schema.Types.ObjectId, ref: 'MPersonnel' }, 
   replies: [replySchema],
 });
 
