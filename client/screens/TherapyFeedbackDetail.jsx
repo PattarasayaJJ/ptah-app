@@ -10,6 +10,16 @@ const TherapyFeedbackDetail = ({ route }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+
+    const formatDateThai = (dateString) => {
+        const options = { day: "numeric", month: "long" };
+        const date = new Date(dateString);
+        const thaiYear = date.getFullYear() + 543; // เพิ่ม 543 เพื่อแปลง ค.ศ. เป็น พ.ศ.
+        const formattedDate = new Intl.DateTimeFormat("th-TH", options).format(date);
+        return `${formattedDate} ${thaiYear}`;
+    };
+
+
     const getFeedbackColor = (feedback) => {
         switch (feedback) {
             case "ทำได้ดี":
@@ -43,13 +53,7 @@ const TherapyFeedbackDetail = ({ route }) => {
             return;
         }
 
-        const formatDateThai = (dateString) => {
-            const options = { day: "numeric", month: "long" };
-            const date = new Date(dateString);
-            const thaiYear = date.getFullYear() + 543; // เพิ่ม 543 เพื่อแปลง ค.ศ. เป็น พ.ศ.
-            const formattedDate = new Intl.DateTimeFormat("th-TH", options).format(date);
-            return `${formattedDate} ${thaiYear}`;
-        };
+       
 
         const formattedDate = new Date(evaluation_date).toISOString().split("T")[0];
 
@@ -81,7 +85,7 @@ const TherapyFeedbackDetail = ({ route }) => {
     return (
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 50 }}>
             <Text style={styles.heading}>รายละเอียดการประเมิน</Text>
-            <Text style={styles.date}>วันที่ {evaluation_date}</Text>
+            <Text style={styles.date}>วันที่ {formatDateThai(evaluation_date)}</Text>
 
             {/* ✅ แสดงข้อมูล Feedback จากแพทย์เสมอ */}
             <View style={styles.feedbackContainer}>
@@ -92,6 +96,12 @@ const TherapyFeedbackDetail = ({ route }) => {
                     ผลการประเมิน : {feedback.feedback_type}
                 </Text>
                 <Text style={styles.text}>ข้อความจากแพทย์ : {feedback.doctor_response}</Text>
+             <Text style={styles.text}>
+              ประเมินโดย : {feedback.doctor_id
+                ? `${feedback.doctor_id.nametitle || ''} ${feedback.doctor_id.name || ''} ${feedback.doctor_id.surname || ''}`
+                : "ไม่ทราบชื่อแพทย์"}
+            </Text>
+            
             </View>
 
             {/* ✅ ถ้ามีข้อมูลการประเมิน ให้แสดง */}

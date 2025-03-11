@@ -107,7 +107,7 @@ const signinController = async (req, res) => {
     if (!match) {
       return res.status(400).send({
         success: false,
-        message: "Invalid ID card number or Password",
+        message: "Invalid  Password",
       });
     }
 

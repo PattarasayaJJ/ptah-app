@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Alert, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Alert, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,7 +13,6 @@ const PostDetails = ({ route }) => {
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [authState] = useContext(AuthContext);
-  const { user } = authState;
 
   useEffect(() => {
     const getUserData = async () => {
@@ -64,7 +63,6 @@ const PostDetails = ({ route }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error Response:', errorData);
         throw new Error(errorData.message || 'Failed to send reply');
       }
 
@@ -73,7 +71,6 @@ const PostDetails = ({ route }) => {
       setReplyingTo(null);
       setComments(responseData.post.comments);
     } catch (error) {
-      console.error('เกิดข้อผิดพลาดขณะส่งความคิดเห็น:', error);
       Alert.alert('Error', 'เกิดข้อผิดพลาดในการส่งความคิดเห็น');
     } finally {
       setLoading(false);
@@ -90,12 +87,12 @@ const PostDetails = ({ route }) => {
       const storedAuth = await AsyncStorage.getItem('@auth');
       const authData = JSON.parse(storedAuth);
       const token = authData?.token;
-  
+
       if (!token) {
         Alert.alert('Error', 'ไม่พบโทเค็นการอนุญาต');
         return;
       }
-  
+
       const response = await fetch(`http://10.0.2.2:8080/api/v1/post/delete-comment/${post._id}/${commentId}`, {
         method: 'DELETE',
         headers: {
@@ -103,45 +100,30 @@ const PostDetails = ({ route }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      const responseText = await response.text();
-      console.log(responseText);
-  
+
       if (!response.ok) {
-        try {
-          const errorData = JSON.parse(responseText);
-          console.error('Error Response:', errorData);
-          throw new Error(errorData.message || 'Failed to delete comment');
-        } catch (error) {
-          console.error('Non-JSON response received:', error);
-          throw new Error('Failed to delete comment, non-JSON response');
-        }
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete comment');
       }
-  
-      try {
-        const responseData = JSON.parse(responseText);
-        setComments(responseData.post.comments);
-      } catch (error) {
-        console.error('Error parsing response:', error);
-        Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบความคิดเห็น');
-      }
+
+      const responseData = await response.json();
+      setComments(responseData.post.comments);
     } catch (error) {
-      console.error('Error deleting comment:', error);
       Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบความคิดเห็น');
     }
   };
-  
+
   const handleDeleteReply = async (commentId, replyId) => {
     try {
       const storedAuth = await AsyncStorage.getItem('@auth');
       const authData = JSON.parse(storedAuth);
       const token = authData?.token;
-  
+
       if (!token) {
         Alert.alert('Error', 'ไม่พบโทเค็นการอนุญาต');
         return;
       }
-  
+
       const response = await fetch(
         `http://10.0.2.2:8080/api/v1/posts/${post._id}/comments/${commentId}/replies/${replyId}`,
         {
@@ -152,33 +134,15 @@ const PostDetails = ({ route }) => {
           },
         }
       );
-  
-      console.log(`Request URL: ${response.url}`);
-      console.log(`HTTP Status: ${response.status}`);
-  
-      const responseText = await response.text();
-      console.log(`Response Text: ${responseText}`);
-  
+
       if (!response.ok) {
-        try {
-          const errorData = JSON.parse(responseText);
-          console.error('Error Response:', errorData);
-          throw new Error(errorData.message || 'Failed to delete reply');
-        } catch (parseError) {
-          console.error('Non-JSON response received:', parseError);
-          throw new Error('Failed to delete reply, non-JSON response');
-        }
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete reply');
       }
-  
-      try {
-        const responseData = JSON.parse(responseText);
-        setComments(responseData.comments);
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบการตอบกลับ');
-      }
+
+      const responseData = await response.json();
+      setComments(responseData.comments);
     } catch (error) {
-      console.error('Error deleting reply:', error);
       Alert.alert('Error', 'เกิดข้อผิดพลาดในการลบการตอบกลับ');
     }
   };
@@ -201,63 +165,49 @@ const PostDetails = ({ route }) => {
               <View style={styles.commentContent}>
                 <View style={styles.commentTextContainer}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={styles.commentInfo}>
-  ตอบกลับโดย : 
-  {comment.postedByUser?.name ||
-    (comment.postedByPersonnel
-      ? `${comment.postedByPersonnel.nametitle}${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
-      : 'ไม่ทราบชื่อ')}
-</Text>
-
+                    <Text style={styles.commentInfo}>
+                      ตอบกลับโดย: {comment.postedByUser?.name || comment.postedByPersonnel?.name  || 'ไม่ทราบชื่อ'}
+                    </Text>
                     <Text style={styles.commentDate}>
                       {moment(comment.created).format('DD/MM/YYYY')}
                     </Text>
                   </View>
                   <Text style={styles.commentText}>{comment.text}</Text>
-                  {(comment.postedByUser?.id === userId || comment.postedByPersonnel?.id === userId) && (
-    <TouchableOpacity
-        onPress={() => handleDeleteComment(comment._id)}
-        style={styles.deleteButton}
-    >
-        <Text style={styles.deleteButtonText}>ลบ</Text>
-    </TouchableOpacity>
-)}
-
+                  {(comment.postedByUser?._id === userId || comment.postedByPersonnel?._id === userId) && (
+                    <TouchableOpacity
+                      onPress={() => handleDeleteComment(comment._id)}
+                      style={styles.deleteButton}
+                    >
+                      <Text style={styles.deleteButtonText}>ลบ</Text>
+                    </TouchableOpacity>
+                  )}
 
                   <TouchableOpacity onPress={() => handleReply(comment._id)} style={styles.replyButton}>
                     <Text style={styles.replyButtonText}>ตอบกลับ</Text>
                   </TouchableOpacity>
+
                   {comment.replies &&
                     comment.replies.map((reply, replyIndex) => (
                       <View key={replyIndex} style={styles.reply}>
                         <View style={styles.replyContent}>
                           <View style={styles.replyTextContainer}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={styles.replyInfo}>
-  ตอบกลับโดย : 
-  {reply.postedByUser?.name ||
-    (reply.postedByPersonnel
-      ? `${reply.postedByPersonnel.nametitle} ${reply.postedByPersonnel.name} ${reply.postedByPersonnel.surname}`
-      : 'ไม่ทราบชื่อ')}
-</Text>
-
+                              <Text style={styles.replyInfo}>
+                                ตอบกลับโดย: {reply.postedByUser?.name || reply.postedByPersonnel?.name || 'ไม่ทราบชื่อ'}
+                              </Text>
                               <Text style={styles.commentDate}>
                                 {moment(reply.created).format('DD/MM/YYYY')}
                               </Text>
                             </View>
                             <Text style={styles.replyText}>{reply.text}</Text>
-                            {(comment.postedByUser?.id === userId || comment.postedByPersonnel?.id === userId) && (
-    <TouchableOpacity
-        onPress={() => handleDeleteComment(comment._id)}
-        style={styles.deleteButton}
-    >
-        <Text style={styles.deleteButtonText}>ลบ</Text>
-    </TouchableOpacity>
-)}
-
-                            <TouchableOpacity onPress={() => handleReply(comment._id)} style={styles.replyButton}>
-                              <Text style={styles.replyButtonText}>ตอบกลับ</Text>
-                            </TouchableOpacity>
+                            {(reply.postedByUser?._id === userId || reply.postedByPersonnel?._id === userId) && (
+                              <TouchableOpacity
+                                onPress={() => handleDeleteReply(comment._id, reply._id)}
+                                style={styles.deleteButton}
+                              >
+                                <Text style={styles.deleteButtonText}>ลบ</Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
                         </View>
                       </View>
