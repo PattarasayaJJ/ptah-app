@@ -37,6 +37,7 @@ app.use("/api/v1/mission", require("./routes/missionRoute"));
 app.use("/api/v1/feedbacks", require("./routes/feedbackRoutes"));
 app.use("/api/v1/evaluation", require("./routes/evaluationRoutes"));
 app.use("/api/v1/forget-password", require("./routes/userRoutes"));
+app.use("/api/v1/notification", require("./routes/notificationRoutes"));
 
 // Socket.io connection
 io.on("connection", (socket) => {

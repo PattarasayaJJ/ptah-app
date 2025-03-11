@@ -24,6 +24,7 @@ import TherapyFeedback from "../../screens/TherapyFeedback.jsx";
 import Resultstherapy from "../../screens/Resultstherapy.jsx";
 import LeaderboardScreen from "../../screens/LeaderboardScreen.jsx";
 import TherapyFeedbackDetail from "../../screens/TherapyFeedbackDetail.jsx"
+import History from "../../screens/History.jsx";
 
 
 const ScreenMenu = () => {
@@ -215,6 +216,18 @@ const ScreenMenu = () => {
           <Stack.Screen
             name="LeaderboardScreen"
             component={LeaderboardScreen}
+            options={{
+              headerBackTitle: "Back",
+              headerTitle: (props) => <HeaderLogo {...props} />,
+              headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
+
+            }}
+          />
+
+<Stack.Screen
+            name="History"
+            component={History}
             options={{
               headerBackTitle: "Back",
               headerTitle: (props) => <HeaderLogo {...props} />,
