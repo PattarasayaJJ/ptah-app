@@ -48,6 +48,11 @@ const HomeMenu = () => {
           </View>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity onPress={() => navigation.navigate('History')}>
+        <View style={styles.menuItem}>
+          <Text style={styles.menuItemText}>ประวัติการประเมิน</Text>
+          </View>
+        </TouchableOpacity>
       
     </View>
     </View>

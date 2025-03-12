@@ -196,45 +196,7 @@ const addCommentController = async (req, res) => {
 };
 
 
-// Delete Comment
-// Delete Comment
-const deleteCommentController = async (req, res) => {
-  try {
-    const { postId, commentId } = req.params;
 
-    const post = await postModel.findById(postId);
-    if (!post) {
-      return res.status(404).send({ success: false, message: "Post not found" });
-    }
-
-    const comment = post.comments.find((c) => c._id.toString() === commentId);
-    if (!comment) {
-      return res.status(404).send({ success: false, message: "Comment not found" });
-    }
-
-    // ตรวจสอบว่ามี comment.postedBy และสามารถใช้ toString() ได้หรือไม่
-    if (!comment.postedBy || comment.postedBy.toString() !== req.auth._id) {
-      return res.status(403).send({ success: false, message: "You can only delete your own comments" });
-    }
-
-    // ลบคอมเม้นต์
-    post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
-    await post.save();
-
-    res.status(200).send({
-      success: true,
-      message: "Comment deleted successfully",
-      post,
-    });
-  } catch (error) {
-    console.error("Error in delete comment:", error);
-    res.status(500).send({
-      success: false,
-      message: "Error in delete comment API",
-      error,
-    });
-  }
-};
 
 
 // Add Reply
@@ -294,6 +256,45 @@ const addReplyController = async (req, res) => {
   }
 };
 
+// Delete Comment
+const deleteCommentController = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+
+    const post = await postModel.findById(postId);
+    if (!post) {
+      return res.status(404).send({ success: false, message: "Post not found" });
+    }
+
+    const comment = post.comments.find((c) => c._id.toString() === commentId);
+    if (!comment) {
+      return res.status(404).send({ success: false, message: "Comment not found" });
+    }
+
+   // ตรวจสอบว่า comment.postedBy สามารถเปรียบเทียบได้ด้วย equals()
+if (!comment.postedBy || !comment.postedBy.equals(req.auth._id)) {
+  return res.status(403).send({ success: false, message: "You can only delete your own comments" });
+}
+
+
+    // ลบคอมเม้นต์
+    post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
+    await post.save();
+
+    res.status(200).send({
+      success: true,
+      message: "Comment deleted successfully",
+      post,
+    });
+  } catch (error) {
+    console.error("Error in delete comment:", error);
+    res.status(500).send({
+      success: false,
+      message: "Error in delete comment API",
+      error,
+    });
+  }
+};
 
 // Delete Reply (เพิ่มฟังก์ชันนี้)
 const deleteReplyController = async (req, res) => {
@@ -315,9 +316,11 @@ const deleteReplyController = async (req, res) => {
       return res.status(404).json({ success: false, message: "Reply not found" });
     }
 
-    if (reply.postedByUser.toString() !== req.auth._id) {
-      return res.status(403).json({ success: false, message: "You can only delete your own replies" });
-    }
+  // ตรวจสอบว่า reply.postedByUser สามารถเปรียบเทียบได้ด้วย equals()
+if (!reply.postedByUser || !reply.postedByUser.equals(req.auth._id)) {
+  return res.status(403).json({ success: false, message: "You can only delete your own replies" });
+}
+
 
     // ลบรีพลาย
     comment.replies = comment.replies.filter((r) => r._id.toString() !== replyId);

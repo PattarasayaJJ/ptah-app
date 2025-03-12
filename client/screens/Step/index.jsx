@@ -94,7 +94,7 @@ const StepScreen = ({ navigation }) => {
                       />
                     </View>
                     <Text style={styles.progressText}>
-                      {step.isEvaluatedToday}/1
+                    {step.isEvaluatedToday === 1 ? "ทำแล้ว" : "ยังไม่ทำ"}
                     </Text>
                   </View>
                 )}
