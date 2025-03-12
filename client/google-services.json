@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "647749383918",
+    "project_id": "ptahproject-3a7d3",
+    "storage_bucket": "ptahproject-3a7d3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647749383918:android:7d569fa7009a98820b65ff",
+        "android_client_info": {
+          "package_name": "com.template.ptah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXPaH7GAZaoufLuDAri5JaRx68duK18vY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
