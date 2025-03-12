@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import RootNavigation from "./navigation";
 import { useFonts } from "expo-font";
 import messaging from "@react-native-firebase/messaging";
+import Toast from "react-native-toast-message";
 
 export default function App() {
   let [fontsLoaded] = useFonts({
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <RootNavigation />
+      <Toast />
     </NavigationContainer>
   );
 }
