@@ -90,7 +90,7 @@ const signinController = async (req, res) => {
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: "User not found",
+        message: "ไม่พบผู้ใช้งาน",
       });
     }
 
@@ -107,7 +107,7 @@ const signinController = async (req, res) => {
     if (!match) {
       return res.status(400).send({
         success: false,
-        message: "Invalid  Password",
+        message: "รหัสผ่านไม่ถูกต้อง",
       });
     }
 
