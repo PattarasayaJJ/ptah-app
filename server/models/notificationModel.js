@@ -16,6 +16,7 @@ const NotificationSchema = new mongoose.Schema(
     updatedBy: { type: mongoose.Types.ObjectId, ref: "User" },
     status: { type: String, required: true },
     isDeleted: { type: Boolean, default: false },
+    dismissedBy: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
