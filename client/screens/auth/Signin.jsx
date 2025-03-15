@@ -69,16 +69,7 @@ const Signin = ({ navigation }) => {
           />
           <SubmitButton btnTitle="เข้าสู่ระบบ" handleSubmit={handleSubmit} />
           <Text style={styles.linkText}>
-            ไม่มีบัญชี ?
-            <Text
-              style={styles.link}
-              onPress={() => navigation.navigate("Signup")}
-            >
-              {" "}
-              ลงทะเบียน
-            </Text>
-            {"  "}
-            <Text>หรือ</Text>
+           
             <Text
               style={styles.link}
               onPress={() => navigation.navigate("ForgotPasswordCheckId")}
@@ -103,7 +94,6 @@ const styles = StyleSheet.create({
     width: 400,
     height: 80,
     marginTop: 130,
-    textAlign: "center",
   },
   linkText: {
     textAlign: "center",

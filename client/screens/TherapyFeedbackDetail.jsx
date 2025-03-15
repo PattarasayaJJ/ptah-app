@@ -116,7 +116,11 @@ const TherapyFeedbackDetail = ({ route }) => {
                                 <Text style={styles.answerName}>{answer.name}</Text>
                                 <Text style={styles.answerResult}>{answer.result}</Text>
                             </View>
+
                         ))}
+
+<Text style={styles.textbox}>ข้อความถึงแพทย์ : {evaluation.suggestion || "-"}
+</Text>
                     </View>
                 ))
             ) : (

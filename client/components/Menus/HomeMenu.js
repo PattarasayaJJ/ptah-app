@@ -24,23 +24,22 @@ const HomeMenu = () => {
           <Text style={styles.menuItemText}>ทำกายภาพบำบัด</Text>
           </View>
         </TouchableOpacity>
-      
+        
         <TouchableOpacity  onPress={() => navigation.navigate('Resultstherapy')}>
         <View style={styles.menuItem}>
           <Image source={require('../../img/icons/success.png')} style={styles.iconStyle} />
           <Text style={styles.menuItemText}>ผลกายภาพบำบัด</Text>
           </View>
         </TouchableOpacity>
+        
       </View>
-
       <View style={styles.row}>
         <TouchableOpacity onPress={() => navigation.navigate('TherapyFeedback')}>
         <View style={styles.menuItem}>
-          <Image source={require('../../img/icons/form.png')} style={styles.iconStyle} />
+          <Image source={require('../../img/icons/admission.png')} style={styles.iconStyle} />
           <Text style={styles.menuItemText}>ผลการประเมิน</Text>
           </View>
         </TouchableOpacity>
-      
         <TouchableOpacity onPress={() => navigation.navigate('LeaderboardScreen')}>
         <View style={styles.menuItem}>
             <Image source={require('../../img/icons/star.png')} style={styles.iconStyle} />
@@ -50,13 +49,12 @@ const HomeMenu = () => {
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('History')}>
         <View style={styles.menuItem}>
-          <Text style={styles.menuItemText}>ประวัติการประเมิน</Text>
+        <Image source={require('../../img/icons/calendar.png')} style={styles.iconStyle} />
+          <Text style={styles.menuItemText}>ปฎิทินการกายภาพ</Text>
           </View>
         </TouchableOpacity>
-      
     </View>
     </View>
- 
   )
 }
 
@@ -64,25 +62,19 @@ const styles  = StyleSheet.create({
   container : {
     flexDirection: 'column',
     margin: 0,
-    justifyContent: 'space-between',
-    
+    justifyContent: 'space-between',   
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
-    
-  
   },
-
   iconStyle: {
     width: 30,
     height: 30,
-   
   },
- 
   menuItem:{
     flexDirection: 'row',
-    backgroundColor:"white",
+    backgroundColor:"#F7FCFF",
     width:180,
     marginTop:13,
     height:70,

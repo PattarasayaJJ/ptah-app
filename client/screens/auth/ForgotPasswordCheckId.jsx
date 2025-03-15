@@ -81,7 +81,7 @@ const ForgotPasswordCheckId = ({ navigation }) => {
           <SubmitButton btnTitle="ตรวจสอบ" handleSubmit={handleSubmit} />
 
           <Text style={styles.linkText}>
-            มีบัญชีอยู่แล้ว?{" "}
+           กลับไปยัง {" "}
             <Text
               style={styles.link}
               onPress={() => navigation.navigate("Signin")}
@@ -124,10 +124,12 @@ const styles = StyleSheet.create({
   linkText: {
     textAlign: "center",
     fontFamily: "Kanit",
+    
   },
   link: {
     color: "white",
     fontFamily: "Kanit",
+    textDecorationLine:"underline"
   },
   bginput: {
     backgroundColor: "#87CEFA",

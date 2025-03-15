@@ -1,33 +1,92 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/authContext";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+  TextInput,
+  Modal
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import { Platform } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
+
+const monthNames = [
+  "ม.ค", "ก.พ", "มี.ค", "เม.ย", "พ.ค", "มิ.ย",
+  "ก.ค", "ส.ค", "ก.ย", "ต.ค", "พ.ย", "ธ.ค"
+];
 
 const TherapyFeedback = () => {
   const [authState] = useContext(AuthContext);
+
+  // Data & loading
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigation = useNavigation(); // ใช้งาน useNavigation เพื่อจัดการการนำทาง
 
+  // Sort (เรียงลำดับ)
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [sortOpen, setSortOpen] = useState(false);
+
+  // Month filter (ค่าตั้งต้น "all")
+  const [monthFilter, setMonthFilter] = useState("all");
+  // state เกี่ยวกับ DropDownPicker สำหรับเดือน (ไม่ใช้งานแล้ว แต่ยังคงไว้)
+  const [monthOpen, setMonthOpen] = useState(false);
+
+  // Filtered results
+  const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
+
+  // Search input
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Navigation
+  const navigation = useNavigation();
+
+  // --- Custom Month Picker (Popup) ---
+  const [isMonthPickerVisible, setMonthPickerVisible] = useState(false);
+  // เก็บปีในรูปแบบ พ.ศ. (เพิ่ม 543)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear() + 543);
+
+  const openMonthPicker = () => setMonthPickerVisible(true);
+  const closeMonthPicker = () => setMonthPickerVisible(false);
+
+  const incrementYear = () => setSelectedYear((prev) => prev + 1);
+  const decrementYear = () => setSelectedYear((prev) => prev - 1);
+
+  // เมื่อเลือกเดือนจาก Popup (index: 0..11)
+  const handleSelectMonth = (index) => {
+    setMonthFilter(index.toString());
+    closeMonthPicker();
+  };
+
+  // --- ดึงข้อมูล feedbacks ---
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `http://10.0.2.2:8080/api/v1/feedbacks/user`,
-          {
-            params: { user_id: authState.user._id },
-            headers: {
-              Authorization: `Bearer ${authState.token}`,
-            },
-          }
-        );
-        setFeedbacks(response.data);
+        const response = await axios.get(`http://10.0.2.2:8080/api/v1/feedbacks/user`, {
+          params: { user_id: authState.user._id },
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+          },
+        });
+        if (!response.data.feedbacks || response.data.feedbacks.length === 0) {
+          setError(null);
+          setFeedbacks([]);
+          setFilteredFeedbacks([]);
+        } else {
+          setFeedbacks(response.data.feedbacks);
+          setFilteredFeedbacks(response.data.feedbacks);
+        }
       } catch (err) {
         console.error("Error fetching feedbacks:", err.response || err);
-        setError(err.response?.data?.message || "Failed to fetch feedbacks");
+        setError("เกิดข้อผิดพลาดในการโหลดข้อมูล");
       } finally {
         setLoading(false);
       }
@@ -36,6 +95,52 @@ const TherapyFeedback = () => {
     fetchFeedbacks();
   }, [authState]);
 
+  // --- เรียงลำดับ + กรองข้อมูล (รวมทั้งกรองตามปีที่เลือกและเดือน) ---
+  useEffect(() => {
+    let filteredData = [...feedbacks];
+
+    // กรอง feedback_type
+    if (sortOrder === "good") {
+      filteredData = filteredData.filter(item => item.feedback_type === "ทำได้ดี");
+    } else if (sortOrder === "improve") {
+      filteredData = filteredData.filter(item => item.feedback_type === "ควรปรับปรุง");
+    }
+
+    // เรียงตามวันที่
+    if (sortOrder === "newest") {
+      filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sortOrder === "oldest") {
+      filteredData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+
+    // กรองตามปี: ตรวจสอบ evaluation_date โดยแปลงปี AD เป็น พ.ศ. ด้วยการ +543
+    filteredData = filteredData.filter(item => {
+      const itemYear = new Date(item.evaluation_date).getFullYear() + 543;
+      return itemYear === selectedYear;
+    });
+
+    // กรองตามเดือน (ถ้าไม่ได้เลือก "ทุกเดือน")
+    if (monthFilter !== "all") {
+      filteredData = filteredData.filter(item => {
+        const itemMonth = new Date(item.evaluation_date).getMonth(); // 0-11
+        return itemMonth.toString() === monthFilter;
+      });
+    }
+
+    setFilteredFeedbacks(filteredData);
+  }, [sortOrder, feedbacks, monthFilter, selectedYear]);
+
+  // --- ค้นหา ---
+  useEffect(() => {
+    const filtered = feedbacks.filter(
+      (feedback) =>
+        feedback.feedback_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        feedback.doctor_response.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredFeedbacks(filtered);
+  }, [searchQuery, feedbacks]);
+
+  // --- Format วันที่ ---
   const formatThaiDate = (dateString) => {
     const date = new Date(dateString);
     const options = { month: "long", day: "numeric" };
@@ -57,72 +162,153 @@ const TherapyFeedback = () => {
   if (loading) {
     return <ActivityIndicator size="large" color="#87CEFA" />;
   }
-
   if (error) {
     return <Text>Error: {error}</Text>;
   }
 
-  if (feedbacks.length === 0) {
-    return <Text style={styles.heading}>ไม่มีผลการประเมิน</Text>;
-  }
-
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>ผลการประเมิน</Text>
-        {feedbacks.map((feedback, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.card}
-            onPress={() =>
-              navigation.navigate("TherapyFeedbackDetail", {
-                feedback,
-                evaluation_date: feedback.evaluation_date,  // เพิ่มการส่ง date ไปด้วย
 
-              })
-            }
-          >
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardHeaderText}>
-                ผลการกายภาพบำบัด: {formatThaiDate(feedback.evaluation_date)}
+        {/* ช่องค้นหา */}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="ค้นหาผลการประเมิน..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {/* Sort & Month Picker Row */}
+        <View style={styles.pickerRow}>
+          {/* Dropdown เรียงลำดับ (Sort) */}
+          <View style={styles.dropdownContainer}>
+          <Text style={styles.monthLabel}>กรองตาม :</Text>
+
+            <DropDownPicker
+              open={sortOpen}
+              value={sortOrder}
+              items={[
+                { label: "วันที่ตอบกลับล่าสุด", value: "newest" },
+                { label: "วันที่ตอบกลับเก่าที่สุด", value: "oldest" },
+                { label: "ทำได้ดี", value: "good" },
+                { label: "ควรปรับปรุง", value: "improve" },
+              ]}
+              setOpen={setSortOpen}
+              setValue={setSortOrder}
+              placeholder="เรียงลำดับ"
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownMenu}
+              listMode="SCROLLVIEW"
+            />
+          </View>
+
+          {/* ปุ่มเลือกเดือน (แทน DropDownPicker เดิม) */}
+          <View style={styles.dropdownContainer}>
+            <Text style={styles.monthLabel}>เดือนที่เลือก:</Text>
+            <TouchableOpacity style={styles.monthSelectButton} onPress={openMonthPicker}>
+              <Text style={styles.monthSelectButtonText}>
+                {monthFilter === "all" ? "ทุกเดือน" : monthNames[Number(monthFilter)]}
               </Text>
-            </View>
-            <View style={styles.cardContent}>
-              <Text
-                style={[
-                  styles.feedbackText,
-                  feedback.feedback_type === "ทำได้ดี"
-                    ? styles.goodFeedback
-                    : styles.improveFeedback,
-                ]}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* แสดงผล Feedbacks */}
+        {filteredFeedbacks.length === 0 ? (
+          <Text style={styles.noDataText}>ไม่พบผลการประเมินของท่าน</Text>
+        ) : (
+          <View>
+            {filteredFeedbacks.map((feedback, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.card}
+                onPress={() =>
+                  navigation.navigate("TherapyFeedbackDetail", {
+                    feedback,
+                    evaluation_date: feedback.evaluation_date,
+                  })
+                }
               >
-                ผลการประเมิน: {feedback.feedback_type}
-              </Text>
-              <Text style={styles.cardText}>
-                ข้อความจากแพทย์: {feedback.doctor_response}
-              </Text>
-             <Text style={styles.cardText}>
-  ประเมินโดย : {feedback.doctor_id
-    ? `${feedback.doctor_id.nametitle || ''} ${feedback.doctor_id.name || ''} ${feedback.doctor_id.surname || ''}`
-    : "ไม่ทราบชื่อแพทย์"}
-</Text>
-
-              <Text style={styles.responseDate}>
-                ตอบกลับเมื่อ: {formatThaiDateWithTime(feedback.createdAt)}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderText}>
+                    ผลการกายภาพบำบัด: {formatThaiDate(feedback.evaluation_date)}
+                  </Text>
+                </View>
+                <View style={styles.cardContent}>
+                  <Text
+                    style={[
+                      styles.feedbackText,
+                      feedback.feedback_type === "ทำได้ดี" ? styles.goodFeedback : styles.improveFeedback,
+                    ]}
+                  >
+                    ผลการประเมิน: {feedback.feedback_type}
+                  </Text>
+                  <Text style={styles.cardText}>
+                    ข้อความจากแพทย์: {feedback.doctor_response}
+                  </Text>
+                  <Text style={styles.cardText}>
+                    ประเมินโดย :{" "}
+                    {feedback.doctor_id
+                      ? `${feedback.doctor_id.nametitle || ""} ${feedback.doctor_id.name || ""} ${feedback.doctor_id.surname || ""}`
+                      : "ไม่ทราบชื่อแพทย์"}
+                  </Text>
+                  <Text style={styles.responseDate}>
+                    ตอบกลับเมื่อ: {formatThaiDateWithTime(feedback.createdAt)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </ScrollView>
+
+      {/* Modal สำหรับเลือกเดือน (Popup 3x4) */}
+      <Modal
+        visible={isMonthPickerVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={closeMonthPicker}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            {/* Header: ลูกศรซ้าย - ปี - ลูกศรขวา */}
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={decrementYear}>
+                <FontAwesome5 name="chevron-left" size={18} color="#333" />
+              </TouchableOpacity>
+              <Text style={styles.modalYearText}>{selectedYear}</Text>
+              <TouchableOpacity onPress={incrementYear}>
+                <FontAwesome5 name="chevron-right" size={18} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            {/* ตารางเดือน (3x4) */}
+            <View style={styles.monthGrid}>
+              {monthNames.map((month, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.monthCell}
+                  onPress={() => handleSelectMonth(index)}
+                >
+                  <Text style={styles.monthCellText}>{month}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* ปุ่มปิด */}
+            <TouchableOpacity style={styles.closeButton} onPress={closeMonthPicker}>
+              <Text style={styles.closeButtonText}>ปิด</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
+  container: { flex: 1, backgroundColor: "white" },
   heading: {
     fontSize: 24,
     fontFamily: "Kanit",
@@ -131,10 +317,68 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderColor: "#87CEFA",
     color: "#333",
+    marginTop: 20,
   },
-  scrollViewContent: {
-    paddingBottom: 20,
+  scrollViewContent: { paddingBottom: 20 },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#87CEFA",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginHorizontal: 20,
+    marginVertical: 20,
   },
+  pickerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginHorizontal: 20,
+    zIndex: 10,
+  },
+  dropdownContainer: { width: "48%", zIndex: 1000 },
+  dropdown: {
+    backgroundColor: "#C2E8FF",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#87CEFA",
+    paddingHorizontal: 10,
+    height: 40,
+  },
+  dropdownMenu: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#87CEFA",
+  },
+  monthDropdownMenu: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#87CEFA",
+    maxHeight: 600,
+    zIndex: 2000,
+    elevation: 20,
+  },
+  /* สไตล์สำหรับปุ่มเลือกเดือน (แทน DropDownPicker) */
+  monthLabel: {
+    fontFamily: "Kanit",
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 5,
+  },
+  monthSelectButton: {
+    backgroundColor: "#C2E8FF",
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  monthSelectButtonText: {
+    fontFamily: "Kanit",
+    fontSize: 16,
+    color: "#333",
+  },
+  /* สไตล์สำหรับ Feedback Card */
   card: {
     marginTop: 30,
     marginHorizontal: 20,
@@ -148,29 +392,20 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  cardHeader: {
-    backgroundColor: "#C2E8FF",
-    padding: 15,
-  },
+  cardHeader: { backgroundColor: "#C2E8FF", padding: 15 },
   cardHeaderText: {
     fontSize: 16,
     fontFamily: "Kanit",
     color: "#333",
   },
-  cardContent: {
-    padding: 15,
-  },
+  cardContent: { padding: 15 },
   feedbackText: {
     fontSize: 16,
     marginBottom: 5,
     fontFamily: "Kanit",
   },
-  goodFeedback: {
-    color: "#1DD345",
-  },
-  improveFeedback: {
-    color: "orange",
-  },
+  goodFeedback: { color: "#1DD345" },
+  improveFeedback: { color: "orange" },
   cardText: {
     fontSize: 16,
     marginVertical: 5,
@@ -182,6 +417,73 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#666",
     fontFamily: "Kanit",
+  },
+  noDataText: {
+    textAlign: "center",
+    marginTop: 100,
+    fontSize: 20,
+    fontFamily: "Kanit",
+  },
+  /* สไตล์ Modal สำหรับเลือกเดือน */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  modalYearText: {
+    fontSize: 20,
+    fontFamily: "Kanit",
+    color: "#333",
+  },
+  monthGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  monthCell: {
+    width: "30%",
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: "#C2E8FF",
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  monthCellText: {
+    fontFamily: "Kanit",
+    fontSize: 16,
+    color: "#333",
+  },
+  closeButton: {
+    marginTop: 20,
+    alignSelf: "center",
+    backgroundColor: "#87CEFA",
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+  closeButtonText: {
+    fontFamily: "Kanit",
+    fontSize: 16,
+    color: "white",
+  },
+  /* สำหรับ Sort Section */
+  sortContainer: {
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
 });
 

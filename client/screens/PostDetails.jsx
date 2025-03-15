@@ -125,7 +125,8 @@ const PostDetails = ({ route }) => {
       }
 
       const response = await fetch(
-        `http://10.0.2.2:8080/api/v1/posts/${post._id}/comments/${commentId}/replies/${replyId}`,
+        `http://10.0.2.2:8080/api/v1/post/posts/${post._id}/comments/${commentId}/replies/${replyId}`,
+        
         {
           method: 'DELETE',
           headers: {
@@ -147,6 +148,41 @@ const PostDetails = ({ route }) => {
     }
   };
 
+
+
+  // ฟังก์ชันสำหรับยืนยันการลบความคิดเห็น
+const confirmDeleteComment = (commentId) => {
+  Alert.alert(
+    'ยืนยันการลบ',
+    'คุณแน่ใจหรือไม่ว่าต้องการลบความคิดเห็นนี้?',
+    [
+      { text: 'ยกเลิก', style: 'cancel' },
+      {
+        text: 'ลบ',
+        style: 'destructive',
+        onPress: () => handleDeleteComment(commentId),
+      },
+    ]
+  );
+};
+
+// ฟังก์ชันสำหรับยืนยันการลบการตอบกลับ
+const confirmDeleteReply = (commentId, replyId) => {
+  Alert.alert(
+    'ยืนยันการลบ',
+    'คุณแน่ใจหรือไม่ว่าต้องการลบการตอบกลับนี้?',
+    [
+      { text: 'ยกเลิก', style: 'cancel' },
+      {
+        text: 'ลบ',
+        style: 'destructive',
+        onPress: () => handleDeleteReply(commentId, replyId),
+      },
+    ]
+  );
+};
+
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <ScrollView>
@@ -165,9 +201,13 @@ const PostDetails = ({ route }) => {
               <View style={styles.commentContent}>
                 <View style={styles.commentTextContainer}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={styles.commentInfo}>
-                      ตอบกลับโดย: {comment.postedByUser?.name || comment.postedByPersonnel?.name  || 'ไม่ทราบชื่อ'}
-                    </Text>
+                  <Text style={styles.commentInfo}>
+  ตอบกลับโดย : 
+  {comment.postedByUser?.name ||
+    (comment.postedByPersonnel
+      ? `${comment.postedByPersonnel.nametitle}${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
+      : 'ไม่ทราบชื่อ')}
+</Text>
                     <Text style={styles.commentDate}>
                       {moment(comment.created).format('DD/MM/YYYY')}
                     </Text>
@@ -175,7 +215,7 @@ const PostDetails = ({ route }) => {
                   <Text style={styles.commentText}>{comment.text}</Text>
                   {(comment.postedByUser?._id === userId || comment.postedByPersonnel?._id === userId) && (
                     <TouchableOpacity
-                      onPress={() => handleDeleteComment(comment._id)}
+                      onPress={() => confirmDeleteComment(comment._id)}
                       style={styles.deleteButton}
                     >
                       <Text style={styles.deleteButtonText}>ลบ</Text>
@@ -192,9 +232,13 @@ const PostDetails = ({ route }) => {
                         <View style={styles.replyContent}>
                           <View style={styles.replyTextContainer}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Text style={styles.replyInfo}>
-                                ตอบกลับโดย: {reply.postedByUser?.name || reply.postedByPersonnel?.name || 'ไม่ทราบชื่อ'}
-                              </Text>
+                            <Text style={styles.replyInfo}>
+  ตอบกลับโดย : 
+  {reply.postedByUser?.name ||
+    (reply.postedByPersonnel
+      ? `${reply.postedByPersonnel.nametitle} ${reply.postedByPersonnel.name} ${reply.postedByPersonnel.surname}`
+      : 'ไม่ทราบชื่อ')}
+</Text>
                               <Text style={styles.commentDate}>
                                 {moment(reply.created).format('DD/MM/YYYY')}
                               </Text>
@@ -202,7 +246,7 @@ const PostDetails = ({ route }) => {
                             <Text style={styles.replyText}>{reply.text}</Text>
                             {(reply.postedByUser?._id === userId || reply.postedByPersonnel?._id === userId) && (
                               <TouchableOpacity
-                                onPress={() => handleDeleteReply(comment._id, reply._id)}
+                                onPress={() =>  confirmDeleteReply(comment._id, reply._id)}
                                 style={styles.deleteButton}
                               >
                                 <Text style={styles.deleteButtonText}>ลบ</Text>

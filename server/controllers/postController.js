@@ -83,7 +83,6 @@ const getUserPostsController = async (req, res) => {
 };
 
 
-// Delete Post
 const deletePostController = async (req, res) => {
   try {
     const { id } = req.params;
@@ -92,16 +91,14 @@ const deletePostController = async (req, res) => {
       return res.status(400).send({ success: false, message: "Invalid post ID" });
     }
 
-    const post = await postModel.findById(id);
+    const post = await postModel.findOneAndDelete({
+      _id: id,
+      postedBy: req.auth._id, // ตรวจสอบว่าเป็นเจ้าของโพสต์
+    });
+
     if (!post) {
-      return res.status(404).send({ success: false, message: "Post not found" });
+      return res.status(404).send({ success: false, message: "Post not found or unauthorized" });
     }
-
-    if (post.postedBy.toString() !== req.auth._id) {
-      return res.status(403).send({ success: false, message: "Unauthorized action" });
-    }
-
-    await post.remove();
 
     res.status(200).send({ success: true, message: "Post deleted successfully" });
   } catch (error) {
@@ -113,6 +110,7 @@ const deletePostController = async (req, res) => {
     });
   }
 };
+
 
 // Update Post
 const updatePostController = async (req, res) => {
@@ -271,13 +269,15 @@ const deleteCommentController = async (req, res) => {
       return res.status(404).send({ success: false, message: "Comment not found" });
     }
 
-   // ตรวจสอบว่า comment.postedBy สามารถเปรียบเทียบได้ด้วย equals()
-if (!comment.postedBy || !comment.postedBy.equals(req.auth._id)) {
-  return res.status(403).send({ success: false, message: "You can only delete your own comments" });
-}
+    // ตรวจสอบสิทธิ์การลบ โดยเช็คทั้ง postedByUser และ postedByPersonnel
+    if (
+      (!comment.postedByUser || !comment.postedByUser.equals(req.auth._id)) &&
+      (!comment.postedByPersonnel || !comment.postedByPersonnel.equals(req.auth._id))
+    ) {
+      return res.status(403).send({ success: false, message: "You can only delete your own comments" });
+    }
 
-
-    // ลบคอมเม้นต์
+    // ลบคอมเมนต์ออกจากโพสต์
     post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
     await post.save();
 
@@ -296,50 +296,70 @@ if (!comment.postedBy || !comment.postedBy.equals(req.auth._id)) {
   }
 };
 
-// Delete Reply (เพิ่มฟังก์ชันนี้)
 const deleteReplyController = async (req, res) => {
   try {
     const { postId, commentId, replyId } = req.params;
 
+    // ค้นหาโพสต์จาก postId
     const post = await postModel.findById(postId);
     if (!post) {
       return res.status(404).json({ success: false, message: "Post not found" });
     }
 
-    const comment = post.comments.find((c) => c._id.toString() === commentId);
+    // ค้นหาคอมเมนต์ในโพสต์จาก commentId
+    const comment = post.comments.id(commentId);
     if (!comment) {
       return res.status(404).json({ success: false, message: "Comment not found" });
     }
 
-    const reply = comment.replies.find((r) => r._id.toString() === replyId);
+    // ค้นหารีพลายในคอมเมนต์โดยใช้ .find() เพื่อเปรียบเทียบ _id เป็น string
+    const reply = comment.replies.find(r => r._id.toString() === replyId);
     if (!reply) {
       return res.status(404).json({ success: false, message: "Reply not found" });
     }
 
-  // ตรวจสอบว่า reply.postedByUser สามารถเปรียบเทียบได้ด้วย equals()
-if (!reply.postedByUser || !reply.postedByUser.equals(req.auth._id)) {
-  return res.status(403).json({ success: false, message: "You can only delete your own replies" });
-}
+    // ตรวจสอบสิทธิ์การลบ (ให้ลบได้เฉพาะเจ้าของรีพลาย)
+    // ในที่นี้ตรวจสอบเฉพาะ postedByUser แต่หากมี postedByPersonnel ให้ปรับเงื่อนไขเพิ่มเติม
+    if (!reply.postedByUser || !reply.postedByUser.equals(req.auth._id)) {
+      return res.status(403).json({ success: false, message: "You can only delete your own replies" });
+    }
 
+    // ลบรีพลายออกจาก replies array โดยใช้ .filter()
+    comment.replies = comment.replies.filter(r => r._id.toString() !== replyId);
 
-    // ลบรีพลาย
-    comment.replies = comment.replies.filter((r) => r._id.toString() !== replyId);
+    // บันทึกโพสต์ที่อัปเดตแล้ว
     await post.save();
 
-    res.status(200).json({
+    // ดึงโพสต์ที่อัปเดตใหม่พร้อม populate ให้ข้อมูลครบถ้วน
+    const updatedPost = await postModel.findById(postId).populate([
+      { path: 'comments.postedByUser', select: 'name' },
+      { path: 'comments.postedByPersonnel', select: 'nametitle name surname' },
+      { path: 'comments.replies.postedByUser', select: 'name' },
+      { path: 'comments.replies.postedByPersonnel', select: 'nametitle name surname' }
+    ]);
+
+    return res.status(200).json({
       success: true,
       message: "Reply deleted successfully",
-      comments: post.comments,
+      comments: updatedPost.comments,
     });
   } catch (error) {
     console.error("Error in delete reply:", error.message);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error in delete reply API",
       error: error.message,
     });
   }
 };
+
+
+
+
+
+
+
+
 module.exports = {
   createPostController,
   getAllpostController,
