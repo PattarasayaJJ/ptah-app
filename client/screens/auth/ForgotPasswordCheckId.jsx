@@ -6,43 +6,58 @@ import {
   Image,
   Alert,
   ScrollView,
+  Modal,
+  Pressable,
 } from "react-native";
 import React, { useState } from "react";
 import InputBox from "../../components/form/InputBox";
 import SubmitButton from "../../components/form/SubmitButton";
 import axios from "axios";
+import CustomModal from "./CustomModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Signup = ({ navigation }) => {
+const ForgotPasswordCheckId = ({ navigation }) => {
   // State
   const [ID_card_number, setID_card_number] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [surename, setSurename] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [email, setEmail] = useState("");
 
   // Function
   const handleSubmit = async () => {
     try {
+      await AsyncStorage.removeItem("email");
+      await AsyncStorage.removeItem("idCardNumber");
+
+      setEmail("");
       setLoading(true);
-      if (!ID_card_number || !password) {
-        Alert.alert("Please Fill All Fields");
-        setLoading(false);
-        return;
-      }
-      setLoading(false);
-      const { data } = await axios.post("/auth/signup", {
-        ID_card_number,
-        password,
-        name,
-        surename,
-        email,
+
+      const { data } = await axios.post("/auth/check-user-id", {
+        idCardNumber: ID_card_number,
       });
-      alert(data && data.message);
-      navigation.navigate("Signin");
-      console.log("Sign Up ==>", { ID_card_number, password, name, surename });
+
+      setEmail(data.data.email);
+      setConfirmModal(true);
+      await AsyncStorage.setItem("email", data.data.email);
+      await AsyncStorage.setItem("idCardNumber", ID_card_number);
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      alert(error.response?.data?.message || "เกิดข้อผิดพลาด");
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
+  const sendOtp = async () => {
+    setConfirmModal(false);
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post("/auth/forget-password", {
+        idCardNumber: ID_card_number,
+      });
+      navigation.navigate("OtpVerification");
+    } catch (error) {
+      alert(error.response?.data?.message || "เกิดข้อผิดพลาด");
       setLoading(false);
       console.log(error);
     }
@@ -57,30 +72,16 @@ const Signup = ({ navigation }) => {
         <Image source={require("../../img/logo_blue.png")} style={styles.img} />
 
         <View style={styles.bginput}>
-          <InputBox inputTitle="ชื่อ" value={name} setValue={setName} />
-          <InputBox
-            inputTitle="นามสกุล"
-            value={surename}
-            setValue={setSurename}
-          />
           <InputBox
             inputTitle="รหัสบัตรประชาชน"
             value={ID_card_number}
             setValue={setID_card_number}
+            maxLength={13}
           />
-          <InputBox inputTitle="อีเมล" value={email} setValue={setEmail} />
-          <InputBox
-            inputTitle="รหัสผ่าน"
-            secureTextEntry={true}
-            autoComplete="password"
-            value={password}
-            setValue={setPassword}
-          />
-
-          <SubmitButton btnTitle="ลงทะเบียน" handleSubmit={handleSubmit} />
+          <SubmitButton btnTitle="ตรวจสอบ" handleSubmit={handleSubmit} />
 
           <Text style={styles.linkText}>
-            มีบัญชีอยู่แล้ว?{" "}
+           กลับไปยัง {" "}
             <Text
               style={styles.link}
               onPress={() => navigation.navigate("Signin")}
@@ -90,6 +91,17 @@ const Signup = ({ navigation }) => {
           </Text>
         </View>
       </ScrollView>
+      <CustomModal
+        isOpen={confirmModal}
+        text={`${email} ใช้อีเมลของคุณไหม`}
+        isCancel={true}
+        btnText="ยืนยัน"
+        onCancel={() => {
+          setID_card_number("");
+          setConfirmModal(false);
+        }}
+        onConfirm={sendOtp}
+      />
     </View>
   );
 };
@@ -112,10 +124,12 @@ const styles = StyleSheet.create({
   linkText: {
     textAlign: "center",
     fontFamily: "Kanit",
+    
   },
   link: {
     color: "white",
     fontFamily: "Kanit",
+    textDecorationLine:"underline"
   },
   bginput: {
     backgroundColor: "#87CEFA",
@@ -128,4 +142,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Signup;
+export default ForgotPasswordCheckId;

@@ -33,28 +33,30 @@ const getAllFeedbacksByUserId = async (req, res) => {
     const userId = req.query.user_id;
 
     if (!userId) {
-      return res.status(400).json({ error: "กรุณาระบุ user_id" });
+      return res.status(400).json({ message: "กรุณาระบุ user_id", feedbacks: [] });
     }
 
     const feedbacks = await feedbackModel
       .find({ user_id: userId })
       .populate({
         path: "doctor_id", 
-        model: "MPersonnel",  // ✅ ระบุโมเดลให้แน่ชัด
+        model: "MPersonnel",
         select: "nametitle name surname",
       })
-      .lean(); // ✅ ใช้ lean() เพื่อให้ได้ JSON ที่ง่ายขึ้น
+      .lean();
 
-    if (!feedbacks.length) {
-      return res.status(404).json({ message: "ไม่พบ Feedback ของผู้ใช้ในระบบ" });
+    // ✅ ถ้าไม่พบข้อมูล ให้ส่ง `200 OK` พร้อม feedbacks: []
+    if (!feedbacks || feedbacks.length === 0) {
+      return res.status(200).json({ message: "ไม่พบผลการประเมิน", feedbacks: [] });
     }
 
-    res.status(200).json(feedbacks);
+    res.status(200).json({ message: "ดึงข้อมูลสำเร็จ", feedbacks });
   } catch (error) {
     console.error("Error fetching feedbacks:", error.message);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล", error });
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล", feedbacks: [] });
   }
 };
+
 
 
 // ดึง Feedback ทั้งหมด พร้อมข้อมูลแพทย์

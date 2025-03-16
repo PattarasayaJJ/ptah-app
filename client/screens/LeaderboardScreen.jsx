@@ -35,6 +35,8 @@ const LeaderboardScreen = () => {
 
   const formatDate = (date) => {
     if (!date) return "";
+    const thaiYear = date.getFullYear() + 543; // แปลง ค.ศ. เป็น พ.ศ.
+
     return date.toLocaleString("th-TH", {
       year: "numeric",
       month: "long",
@@ -42,7 +44,8 @@ const LeaderboardScreen = () => {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-    });
+    }).replace(/\d{4}/, thaiYear)// แทนที่ปี ค.ศ. ด้วย พ.ศ.
+    .replace("ค.ศ.", "พ.ศ."); // แทนที่ "ค.ศ." ด้วย "พ.ศ."
   };
 
   const renderPodium = () => {
@@ -53,15 +56,15 @@ const LeaderboardScreen = () => {
     return (
       <View style={styles.podiumContainer}>
         <Text style={[styles.rankName, styles.rank1]}>
-          {first.name.slice(0, 3)}*** {first.surname.slice(0, 3)}**
+          {first.name.slice(0, 3)}***  {first.surname.slice(0, 3)}**
         </Text>
         <Text style={[styles.rankStars, styles.star1]}>{first.stars} ⭐</Text>
         <Text style={[styles.rankName, styles.rank2]}>
-          {second.name.slice(0, 3)}*** {second.surname.slice(0, 3)}**
+          {second.name.slice(0, 3)}***  {second.surname.slice(0, 3)}**
         </Text>
         <Text style={[styles.rankStars, styles.star2]}>{second.stars} ⭐</Text>
         <Text style={[styles.rankName, styles.rank3]}>
-          {third.name.slice(0, 3)}*** {third.surname.slice(0, 3)}**
+          {third.name.slice(0, 3)}***  {third.surname.slice(0, 3)}**
         </Text>
         <Text style={[styles.rankStars, styles.star3]}>{third.stars} ⭐</Text>
         <Image source={require("../img/podium.png")} style={styles.podiumImage} />
@@ -93,7 +96,7 @@ const LeaderboardScreen = () => {
                   isCurrentUser && styles.currentUserName,
                 ]}
               >
-                {item.name.slice(0, 3)}*** {item.surname.slice(0, 3)}**
+                {item.name.slice(0, 3)}***  {item.surname.slice(0, 3)}**
               </Text>
               <Text style={styles.stars}>{item.stars} ⭐</Text>
             </View>
@@ -141,7 +144,7 @@ const styles = StyleSheet.create({
   },
   rankStars: {
     position: "absolute",
-    fontSize: 16,
+    fontSize: 20,
     color: "#333",
     fontFamily: "Kanit",
   },
@@ -159,17 +162,17 @@ const styles = StyleSheet.create({
     right: "12%",
   },
   star1: {
-    top: -70, // เลื่อนขึ้นไปอยู่บนชื่อ
+    top: -75, // เลื่อนขึ้นไปอยู่บนชื่อ
     left: "50%",
     transform: [{ translateX: -20 }],
   },
   star2: {
-    top: 60, // เลื่อนขึ้นไปอยู่บนชื่อ
+    top: 50, // เลื่อนขึ้นไปอยู่บนชื่อ
     left: "18%",
   },
   star3: {
-    top: 75, // เลื่อนขึ้นไปอยู่บนชื่อ
-    right: "22%",
+    top: 70, // เลื่อนขึ้นไปอยู่บนชื่อ
+    right: "20%",
   },
   row: {
     flexDirection: "row",

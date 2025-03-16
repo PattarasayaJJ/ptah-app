@@ -22,12 +22,7 @@ const Account = () => {
     return (
         <View style={styles.container}>
             <View style={styles.rowContainer}>
-                <Image
-                    style={styles.imgprofile}
-                    source={{
-                        uri: 'https://p16-va.lemon8cdn.com/tos-alisg-v-a3e477-sg/o4fXpT5bfAA3xIQWF0LeGJAEu8eAFkIH2AGO29~tplv-tej9nj120t-origin.webp'
-                    }}
-                />
+               
                 <View style={styles.textContainer}>
                     <Text style={styles.username}> {authState?.user.name}  {authState?.user.surname}  {(authState.user?.stars|| 0) + 1 } ⭐</Text>
                     <Text style={styles.idcard}> เบอร์โทรศัพท์ : {authState?.user.tel} </Text>
@@ -106,11 +101,7 @@ const styles = StyleSheet.create({
     textContainer: {
         marginLeft: 10
     },
-    imgprofile: {
-        width: 75,
-        height: 75,
-        borderRadius: 20,
-    },
+   
     username: {
         fontSize: 15,
         color: "black",

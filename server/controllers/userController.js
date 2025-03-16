@@ -1,8 +1,9 @@
 const JWT = require("jsonwebtoken");
 const userModel = require("../models/userModel");
+const OTP = require("../models/otpModel");
+const otpGenerator = require("otp-generator");
 const { hashPassword, comparePassword } = require("../helpers/authHelper");
 var { expressjwt: jwt } = require("express-jwt");
-const { sendEmail } = require("../services/mailer"); // Correct the import statement
 
 // Middleware
 const requireSignIn = jwt({
@@ -15,7 +16,7 @@ const requireSignIn = jwt({
 // Signup Controller
 const signupController = async (req, res) => {
   try {
-    const { ID_card_number, password, name, surename } = req.body;
+    const { ID_card_number, password, name, surename, email } = req.body;
 
     // Validation
     if (!ID_card_number) {
@@ -46,6 +47,14 @@ const signupController = async (req, res) => {
       });
     }
 
+    const existingEmail = await userModel.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).send({
+        success: false,
+        message: "User already signed up with this email",
+      });
+    }
+
     // Hash password
     const hashedPassword = await hashPassword(password);
 
@@ -55,12 +64,13 @@ const signupController = async (req, res) => {
       password: hashedPassword,
       name,
       surename,
+      email,
     });
 
     return res.status(201).send({
       success: true,
       message: "Signup successful, please sign in",
-      user: { ID_card_number, name, surename },
+      user: { ID_card_number, name, surename, email },
     });
   } catch (error) {
     console.error("Error in signupController:", error);
@@ -90,7 +100,7 @@ const signinController = async (req, res) => {
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: "User not found",
+        message: "ไม่พบผู้ใช้งาน",
       });
     }
 
@@ -107,7 +117,7 @@ const signinController = async (req, res) => {
     if (!match) {
       return res.status(400).send({
         success: false,
-        message: "Invalid ID card number or Password",
+        message: "รหัสผ่านไม่ถูกต้อง",
       });
     }
 
@@ -204,7 +214,7 @@ const leaderboardController = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      leaderboard: users.map(user => ({
+      leaderboard: users.map((user) => ({
         id: user._id, // เปลี่ยน _id เป็น id
         name: user.name,
         surname: user.surname,
@@ -213,39 +223,150 @@ const leaderboardController = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
-    res.status(500).json({ success: false, message: "Error fetching leaderboard", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching leaderboard",
+      error: error.message,
+    });
   }
 };
 
 const forgetPasswordController = async (req, res) => {
   try {
-    const { ID_card_number } = req.body;
+    const { idCardNumber } = req.body;
 
     // Find user by username
-    const user = await userModel.findOne({ ID_card_number });
+    const user = await userModel.findOne({ ID_card_number: idCardNumber });
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: "User not found",
+        message: "ไม่พบเลขบัตรประชาชนนี้ในระบบ",
       });
     }
- 
-    // Log user information
-    // console.log("User found:", user);
 
-    await sendEmail(
-      user.email, 
-      "การรีเซ็ตรหัสผ่าน",
-      "ทดสอบ" 
-    );
-  
-    res.status(200).json({ msg: "Password reset email sent" });
-  
+    const email = user.email;
+
+    let otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+    let result = await OTP.findOne({ otp: otp });
+    while (result) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+      });
+      result = await OTP.findOne({ otp: otp });
+    }
+    const otpPayload = { email, otp };
+    const otpBody = await OTP.create(otpPayload);
+    res.status(200).json({ msg: "Password reset email sent", otp });
   } catch (error) {
     console.error("Error in forgetPasswordController:", error);
     return res.status(500).send({
       success: false,
       message: "Error in forget password API",
+      error: error.message,
+    });
+  }
+};
+
+const confirmOtpController = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+
+    if (response.length === 0 || otp !== response[0].otp) {
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error otp",
+      error: error.message,
+    });
+  }
+};
+
+const checkUserIdController = async (req, res) => {
+  try {
+    const users = await userModel.findOne({
+      ID_card_number: req.body.idCardNumber,
+    });
+
+    if (!users) {
+      return res.status(404).send({
+        success: false,
+        message: "ไม่พบเลขบัตรประชาชนนี้ในระบบ",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        email: users.email,
+        idCardNumber: users.ID_card_number,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching leaderboard",
+      error: error.message,
+    });
+  }
+};
+
+const newPasswordController = async (req, res) => {
+  try {
+    const { idCardNumber, password } = req.body;
+
+    const users = await userModel.findOne({
+      ID_card_number: idCardNumber,
+    });
+
+    if (!users) {
+      return res.status(404).send({
+        success: false,
+        message: "ไม่พบเลขบัตรประชาชนนี้ในระบบ",
+      });
+    }
+
+    const updates = {};
+    if (password) {
+      if (password.length < 10) {
+        return res.status(400).send({
+          success: false,
+          message: "Password must be at least 10 characters long",
+        });
+      }
+      updates.password = await hashPassword(password);
+    }
+
+    const updatedUser = await userModel.findOneAndUpdate(
+      { ID_card_number: idCardNumber },
+      { $set: updates },
+      { new: true }
+    );
+
+    // Remove password before sending updated user data
+    updatedUser.password = undefined;
+
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching leaderboard",
       error: error.message,
     });
   }
@@ -257,5 +378,8 @@ module.exports = {
   updateUserController,
   requireSignIn,
   leaderboardController,
-  forgetPasswordController, 
+  forgetPasswordController,
+  checkUserIdController,
+  confirmOtpController,
+  newPasswordController,
 };

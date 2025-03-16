@@ -82,22 +82,20 @@ const StepScreen = ({ navigation }) => {
                   <Text style={styles.stepTitle}>{step.name}</Text>
                 </View>
                 {step.no !== 1 && (
-                  <View style={styles.progressBarContainer}>
-                    <View style={styles.progressBarBackground}>
-                      <View
-                        style={{
-                          ...styles.progressBar,
-                          width: `${(step.isEvaluatedToday / 1) * 100}%`,
-                          backgroundColor:
-                            step.isEvaluatedToday === 1 ? "#4caf50" : "#bdbdbd",
-                        }}
-                      />
-                    </View>
-                    <Text style={styles.progressText}>
-                      {step.isEvaluatedToday}/1
-                    </Text>
-                  </View>
+
+                <View style={styles.progressBarContainer}>
+                <Text
+                  style={[
+                    styles.progressText,
+                    { color: step.isEvaluatedToday === 1 ? "#4caf50" : "#bdbdbd" },
+                  ]}
+                >
+                  {step.isEvaluatedToday === 1 ? "ทำแล้ว" : "ยังไม่ทำ"}
+                </Text>
+              </View>
+              
                 )}
+                
               </TouchableOpacity>
             ))}
         </ScrollView>
