@@ -13,6 +13,7 @@ import Myposts from "../../screens/Myposts";
 import HeaderLogo from "../../screens/HeaderLogo.jsx";
 import { TouchableOpacity } from "react-native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import { Badge } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import Allblog from "../../screens/Allblog.jsx";
 import EditPostScreen from "../../screens/EditPost.jsx";
@@ -23,8 +24,7 @@ import StepDetailScreen from "../../screens/Step/Detail.jsx";
 import TherapyFeedback from "../../screens/TherapyFeedback.jsx";
 import Resultstherapy from "../../screens/Resultstherapy.jsx";
 import LeaderboardScreen from "../../screens/LeaderboardScreen.jsx";
-import TherapyFeedbackDetail from "../../screens/TherapyFeedbackDetail.jsx"
-
+import TherapyFeedbackDetail from "../../screens/TherapyFeedbackDetail.jsx";
 
 const ScreenMenu = () => {
   const navigation = useNavigation();
@@ -51,6 +51,12 @@ const ScreenMenu = () => {
               headerRight: () => (
                 <TouchableOpacity
                   onPress={() => navigation.navigate("Notification")}
+                  style={{
+                    position: "relative",
+                    width: 40,
+                    height: 40,
+                    marginTop: 6,
+                  }}
                 >
                   <FontAwesome5
                     name="bell"
@@ -58,6 +64,17 @@ const ScreenMenu = () => {
                     color="#87CEFA"
                     style={{ marginLeft: 10 }}
                   />
+                  {state.notificationsCount !== "" && (
+                    <Badge
+                      value={state.notificationsCount}
+                      status="error"
+                      containerStyle={{
+                        position: "absolute",
+                        top: -4,
+                        right: -4,
+                      }}
+                    />
+                  )}
                 </TouchableOpacity>
               ),
             }}
@@ -71,7 +88,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
 
@@ -83,7 +99,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
 
@@ -95,7 +110,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
 
@@ -107,7 +121,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
           <Stack.Screen
@@ -118,7 +131,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
 
@@ -130,7 +142,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
 
@@ -142,19 +153,16 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
           <Stack.Screen
             name="Therapy"
             component={Therapy}
             options={{
-              
-                headerBackTitle: "Back",
-               headerTitle: (props) => <HeaderLogo {...props} />,
-               headerTitleAlign: "center",
-               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
+              headerBackTitle: "Back",
+              headerTitle: (props) => <HeaderLogo {...props} />,
+              headerTitleAlign: "center",
+              headerShadowVisible: false, // เอาเส้นใต้ Header ออก
             }}
           />
           <Stack.Screen
@@ -186,10 +194,9 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
-             <Stack.Screen
+          <Stack.Screen
             name="TherapyFeedbackDetail"
             component={TherapyFeedbackDetail}
             options={{
@@ -197,7 +204,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
 
@@ -220,7 +226,6 @@ const ScreenMenu = () => {
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
-
             }}
           />
         </>

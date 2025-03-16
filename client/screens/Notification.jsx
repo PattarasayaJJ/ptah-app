@@ -1,33 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import {
+  Alert,
+  View,
+  TouchableOpacity,
+  Text,
+  FlatList,
+  StyleSheet,
+} from "react-native";
 import axios from "axios";
 import moment from "moment";
 import { AuthContext } from "../context/authContext";
 import FooterMenu from "../components/Menus/FooterMenu";
-
-const notifications = [
-  {
-    id: "1",
-    type: "camera",
-    title: "แจ้งเตือนถ่ายทำกายภาพ",
-    message: "ถึงเวลาทำกายภาพบำบัดแล้ว ครั้งที่ 1 เวลา 08:00 น.",
-    date: "8 มีนาคม 2568 เวลา 08:00 น.",
-  },
-  {
-    id: "2",
-    type: "camera",
-    title: "แจ้งเตือนถ่ายทำกายภาพ",
-    message: "ถึงเวลาทำกายภาพบำบัดแล้ว ครั้งที่ 2 เวลา 16:00 น.",
-    date: "7 มีนาคม 2568 เวลา 16:00 น.",
-  },
-  {
-    id: "3",
-    type: "general",
-    title: "แจ้งเตือนทั่วไป",
-    message: "ประกาศผู้ใช้งาน....",
-    date: "7 มีนาคม 2568 เวลา 10:00 น.",
-  },
-];
+import Toast from "react-native-toast-message";
 
 const Notification = () => {
   const [state] = useContext(AuthContext);
@@ -49,9 +33,45 @@ const Notification = () => {
     }
   };
 
+  const handleDeleteNotification = async (id) => {
+    try {
+      const response = await axios.post(`notification/${id}/dismiss`);
+      if (response.status === 200) {
+        handleGetNotifications();
+        Toast.show({
+          type: "success",
+          text1: "ลบการแจ้งเตือน สำเร็จ!",
+          text2: "",
+        });
+      }
+    } catch (err) {
+      console.log("err get notifications", err);
+    }
+  };
+
   const NotificationItem = ({ item }) => {
     return (
-      <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        delayLongPress={1500}
+        onLongPress={() =>
+          Alert.alert(
+            "ยืนยันการลบ!",
+            `คุณต้องการลบ การแจ้งเตือน ${item.title} นี้ใช่หรือไม่`,
+            [
+              {
+                text: "ยกเลิก",
+                onPress: () => console.log("Cancel Pressed"),
+                style: "cancel",
+              },
+              {
+                text: "ยืนยัน",
+                onPress: () => handleDeleteNotification(item._id),
+              },
+            ]
+          )
+        }
+      >
         <View style={styles.headerCard}>
           <Text style={styles.title(item.notifyType)}>{item.title}</Text>
           {item.notifyType === "การแจ้งเตือนสำคัญ" && (
@@ -62,7 +82,7 @@ const Notification = () => {
         <Text style={styles.date}>
           {moment(item.notifyDate).format("DD MMMM YYYY เวลา HH.mm น.")}
         </Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 

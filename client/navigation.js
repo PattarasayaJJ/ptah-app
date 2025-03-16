@@ -47,18 +47,7 @@ const RootNavigation = () => {
       console.log("token", token);
     }
   };
-  const setupNotificationListeners = () => {
-    Notifications.events().registerNotificationReceivedForeground(
-      (notification, completion) => {
-        console.log("Notification received in foreground:", notification);
-        completion({ alert: true, sound: true, badge: false });
-      }
-    );
 
-    Notifications.events().registerNotificationOpened((notification) => {
-      console.log("Notification opened:", notification);
-    });
-  };
   return (
     <AuthProvider>
       <PostProvider>
