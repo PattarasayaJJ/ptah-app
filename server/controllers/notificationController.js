@@ -3,8 +3,15 @@ const NotificationModel = require("../models/notificationModel");
 
 // Get All Posts
 const getAllNotificationController = async (req, res) => {
+  console.log("user", req);
+
+  const userId = req.auth._id;
+
   try {
-    const notifications = await NotificationModel.find();
+    const notifications = await NotificationModel.find({
+      dismissedBy: { $ne: userId },
+      isDeleted: false, // กรองแจ้งเตือนที่ถูกลบออกไปแล้ว (ถ้ามีการใช้งาน)
+    }).sort({ notifyDate: -1 });
 
     res.status(200).send({
       success: true,
@@ -21,6 +28,29 @@ const getAllNotificationController = async (req, res) => {
   }
 };
 
+const dismissNotificationController = async (req, res) => {
+  const notificationId = req.params.id;
+  console.log("notificationId", notificationId);
+  const userId = req.auth._id; // จาก middleware ที่ตรวจสอบ auth แล้ว
+
+  try {
+    // เพิ่ม userId เข้าไปใน dismissedBy (ถ้ายังไม่มีใน array)
+    await NotificationModel.findByIdAndUpdate(
+      notificationId,
+      { $addToSet: { dismissedBy: userId } },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Dismissed notification successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   getAllNotificationController,
+  dismissNotificationController,
 };

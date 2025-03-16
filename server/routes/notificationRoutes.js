@@ -2,6 +2,7 @@ const express = require("express");
 const { requireSignIn } = require("../controllers/userController");
 const {
   getAllNotificationController,
+  dismissNotificationController,
 } = require("../controllers/notificationController");
 
 const router = express.Router();
@@ -12,5 +13,6 @@ router.get(
   requireSignIn,
   getAllNotificationController
 );
+router.post("/:id/dismiss", requireSignIn, dismissNotificationController);
 
 module.exports = router;
