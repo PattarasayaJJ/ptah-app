@@ -3,6 +3,7 @@ const { requireSignIn } = require("../controllers/userController");
 const {
   getAllNotificationController,
   dismissNotificationController,
+  dismissAllNotificationsController,
 } = require("../controllers/notificationController");
 
 const router = express.Router();
@@ -14,5 +15,10 @@ router.get(
   getAllNotificationController
 );
 router.post("/:id/dismiss", requireSignIn, dismissNotificationController);
+router.post(
+  "/notifications/dismiss-all",
+  requireSignIn,
+  dismissAllNotificationsController
+);
 
 module.exports = router;
