@@ -128,7 +128,8 @@ const Notification = () => {
                 ]
               )
             }
-            disabled
+            disabled={notificationDatas.length === 0}
+
           >
             <Text
               style={styles.titleDelete(
