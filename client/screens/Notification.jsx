@@ -51,6 +51,24 @@ const Notification = () => {
     }
   };
 
+  const handleDeleteNotificationAll = async () => {
+    try {
+      const response = await axios.post(
+        `notification/notifications/dismiss-all`
+      );
+      if (response.status === 200) {
+        handleGetNotifications();
+        Toast.show({
+          type: "success",
+          text1: "ลบการแจ้งเตือน สำเร็จ!",
+          text2: "",
+        });
+      }
+    } catch (err) {
+      console.log("err get notifications", err);
+    }
+  };
+
   const NotificationItem = ({ item }) => {
     return (
       <TouchableOpacity
@@ -91,6 +109,36 @@ const Notification = () => {
   return (
     <View style={styles.container}>
       <View style={styles.viewFlatlist}>
+        <View style={styles.viewBtn}>
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert(
+                "ยืนยันการลบ!",
+                `คุณต้องการลบ การแจ้งเตือน ทั้งหมดใช่หรือไม่ ?`,
+                [
+                  {
+                    text: "ยกเลิก",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel",
+                  },
+                  {
+                    text: "ยืนยัน",
+                    onPress: () => handleDeleteNotificationAll(),
+                  },
+                ]
+              )
+            }
+            disabled
+          >
+            <Text
+              style={styles.titleDelete(
+                notificationDatas.length > 0 ? "have" : "no"
+              )}
+            >
+              ลบทั้งหมด
+            </Text>
+          </TouchableOpacity>
+        </View>
         <FlatList
           data={notificationDatas}
           keyExtractor={(item) => item._id}
@@ -107,9 +155,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    paddingTop: 40,
+    paddingTop: 20,
     backgroundColor: "white",
   },
+  viewBtn: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 10,
+  },
+  titleDelete: (type) => ({
+    fontSize: 16,
+    fontWeight: "bold",
+    color: type === "have" ? "#0188dc" : "#BEBEBE",
+    paddingBottom: 10,
+  }),
   viewFlatlist: {
     paddingHorizontal: 14,
     paddingBottom: 70,

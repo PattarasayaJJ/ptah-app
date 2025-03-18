@@ -50,7 +50,27 @@ const dismissNotificationController = async (req, res) => {
   }
 };
 
+const dismissAllNotificationsController = async (req, res) => {
+  const userId = req.auth._id; // จาก middleware ตรวจสอบ auth แล้ว
+
+  try {
+    // อัปเดตทุก notification ที่ userId ยังไม่ dismiss
+    await NotificationModel.updateMany(
+      { dismissedBy: { $ne: userId } }, // กรองเฉพาะแจ้งเตือนที่ user ยังไม่ได้ dismiss
+      { $addToSet: { dismissedBy: userId } } // เพิ่ม userId ใน dismissedBy
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Dismissed all notifications successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   getAllNotificationController,
   dismissNotificationController,
+  dismissAllNotificationsController,
 };
