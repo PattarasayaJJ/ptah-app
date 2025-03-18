@@ -65,6 +65,14 @@ const TherapyFeedback = () => {
     closeMonthPicker();
   };
 
+  const resetFilters = () => {
+    setSortOrder("newest"); // รีเซ็ตการเรียงลำดับ
+    setMonthFilter("all"); // รีเซ็ตตัวกรองเดือน
+    setSearchQuery(""); // รีเซ็ตช่องค้นหา
+  };
+  
+
+
   // --- ดึงข้อมูล feedbacks ---
   useEffect(() => {
     const fetchFeedbacks = async () => {
@@ -171,6 +179,7 @@ const TherapyFeedback = () => {
       <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>ผลการประเมิน</Text>
 
+     
         {/* ช่องค้นหา */}
         <TextInput
           style={styles.searchInput}
@@ -181,6 +190,7 @@ const TherapyFeedback = () => {
 
         {/* Sort & Month Picker Row */}
         <View style={styles.pickerRow}>
+          
           {/* Dropdown เรียงลำดับ (Sort) */}
           <View style={styles.dropdownContainer}>
           <Text style={styles.monthLabel}>กรองตาม :</Text>
@@ -203,6 +213,8 @@ const TherapyFeedback = () => {
             />
           </View>
 
+      
+
           {/* ปุ่มเลือกเดือน (แทน DropDownPicker เดิม) */}
           <View style={styles.dropdownContainer}>
             <Text style={styles.monthLabel}>เดือนที่เลือก:</Text>
@@ -211,8 +223,12 @@ const TherapyFeedback = () => {
                 {monthFilter === "all" ? "ทุกเดือน" : monthNames[Number(monthFilter)]}
               </Text>
             </TouchableOpacity>
+            
           </View>
+          
         </View>
+
+        
 
         {/* แสดงผล Feedbacks */}
         {filteredFeedbacks.length === 0 ? (
@@ -270,13 +286,17 @@ const TherapyFeedback = () => {
         animationType="fade"
         onRequestClose={closeMonthPicker}
       >
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
+
             {/* Header: ลูกศรซ้าย - ปี - ลูกศรขวา */}
             <View style={styles.modalHeader}>
+
               <TouchableOpacity onPress={decrementYear}>
                 <FontAwesome5 name="chevron-left" size={18} color="#333" />
               </TouchableOpacity>
+
               <Text style={styles.modalYearText}>{selectedYear}</Text>
               <TouchableOpacity onPress={incrementYear}>
                 <FontAwesome5 name="chevron-right" size={18} color="#333" />
@@ -344,12 +364,16 @@ const styles = StyleSheet.create({
     borderColor: "#87CEFA",
     paddingHorizontal: 10,
     height: 40,
+    width:180
+
   },
   dropdownMenu: {
     backgroundColor: "white",
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#87CEFA",
+    width:180
+
   },
   monthDropdownMenu: {
     backgroundColor: "white",
@@ -368,10 +392,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   monthSelectButton: {
-    backgroundColor: "#C2E8FF",
+    backgroundColor: "#white",
     borderRadius: 10,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: "center",
+    width:100,
+    borderWidth: 1,
+    borderColor: "#87CEFA",
+    
+    
   },
   monthSelectButtonText: {
     fontFamily: "Kanit",
@@ -485,6 +514,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 10,
   },
+  resetButton: {
+    backgroundColor: "#FF6347",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  resetButtonText: {
+    fontSize: 14,
+    fontFamily: "Kanit",
+    color: "white",
+  },
+  
 });
 
 export default TherapyFeedback;

@@ -23,6 +23,7 @@ const Notification = () => {
   }, []);
 
   const handleGetNotifications = async () => {
+
     try {
       const response = await axios.get("/notification/get-all-notification");
       if (response.status === 200) {
@@ -31,6 +32,7 @@ const Notification = () => {
     } catch (err) {
       console.log("err get notifications", err);
     }
+    
   };
 
   const handleDeleteNotification = async (id) => {

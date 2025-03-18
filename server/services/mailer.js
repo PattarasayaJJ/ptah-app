@@ -4,10 +4,12 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail', // หรือใช้บริการอื่น ๆ เช่น 'smtp.mailtrap.io'
   auth: {
-    user: "ponduuu123@gmail.com",
-    pass: "jpzkzwxyaynydcfe"
+    user: "jptnp20@gmail.com",
+    pass: "ixxbibmejiyhjbhg"
   },
 });
+
+
 
 // ฟังก์ชันส่งอีเมล
 const sendEmail = async (to, subject, text, html) => {

@@ -167,7 +167,7 @@ const History = () => {
       <View style={styles.legendContainer}>
         <LegendItem color="#1DD345" label="ทำได้ดี" />
         <LegendItem color="orange" label="ควรปรับปรุง" />
-        <LegendItem color="#93C5FD" label="ยังไม่ประเมิน" />
+        <LegendItem color="#93C5FD" label="แพทย์ยังไม่ประเมิน" />
         <LegendItem color="red" label="คุณไม่ได้กายภาพบำบัด" />
         <Text style={styles.getstar}>⭐ วันที่ทำกายภาพครบทั้ง 4 ด่าน </Text>
       </View>
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   getstar: {
     fontSize: 16,
-    marginTop: 10,
+    marginTop: 5,
     fontFamily: "Kanit",
   },
   headerText:{

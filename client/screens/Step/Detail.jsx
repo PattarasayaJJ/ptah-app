@@ -52,7 +52,7 @@ const StepDetailScreen = ({ navigation, route }) => {
     } else {
       clearInterval(timer);
     }
-
+    
     return () => clearInterval(timer);
   }, [isRunning]);
 
@@ -255,7 +255,7 @@ const StepDetailScreen = ({ navigation, route }) => {
                         uri: missionDetail.submissions
                           ? missionDetail?.submissions[
                               subMissionLength
-                            ]?.photoUrl
+                            ]?.imageUrl
                           : "",
                       }}
                     />
@@ -310,7 +310,7 @@ const StepDetailScreen = ({ navigation, route }) => {
             style={styles.expandedImage}
             source={{
               uri: missionDetail.submissions
-                ? missionDetail?.submissions[subMissionLength]?.photoUrl
+                ? missionDetail?.submissions[subMissionLength]?.imageUrl
                 : "",
             }}
           />

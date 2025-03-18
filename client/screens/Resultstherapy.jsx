@@ -198,6 +198,7 @@ const Resultstherapy = ({ navigation, route }) => {
             )}
           />
         </View>
+        
 
         {answers.length > 0 && (
           <>
