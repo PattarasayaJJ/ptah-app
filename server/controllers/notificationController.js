@@ -8,9 +8,13 @@ const getAllNotificationController = async (req, res) => {
   const userId = req.auth._id;
 
   try {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
     const notifications = await NotificationModel.find({
       dismissedBy: { $ne: userId },
       isDeleted: false, // กรองแจ้งเตือนที่ถูกลบออกไปแล้ว (ถ้ามีการใช้งาน)
+      notifyDate: { $lte: today },
     }).sort({ notifyDate: -1 });
 
     res.status(200).send({
