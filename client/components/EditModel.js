@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
   buttonedit: {
     borderColor:"#87CEFA",
     backgroundColor: "white",
-    borderColor:"#87CEFA",
     
 
     },

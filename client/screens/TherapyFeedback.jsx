@@ -18,7 +18,7 @@ import { Platform } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
 const monthNames = [
-  "ม.ค", "ก.พ", "มี.ค", "เม.ย", "พ.ค", "มิ.ย",
+ "ทุกเดือน", "ม.ค", "ก.พ", "มี.ค", "เม.ย", "พ.ค", "มิ.ย",
   "ก.ค", "ส.ค", "ก.ย", "ต.ค", "พ.ย", "ธ.ค"
 ];
 
@@ -61,8 +61,8 @@ const TherapyFeedback = () => {
 
   // เมื่อเลือกเดือนจาก Popup (index: 0..11)
   const handleSelectMonth = (index) => {
-    setMonthFilter(index.toString());
-    closeMonthPicker();
+    setMonthFilter(index === 0 ? "all" : index.toString()); // ✅ ถ้า index เป็น 0 ให้ใช้ "all"
+  setMonthPickerVisible(false);
   };
 
   const resetFilters = () => {
@@ -130,10 +130,11 @@ const TherapyFeedback = () => {
     // กรองตามเดือน (ถ้าไม่ได้เลือก "ทุกเดือน")
     if (monthFilter !== "all") {
       filteredData = filteredData.filter(item => {
-        const itemMonth = new Date(item.evaluation_date).getMonth(); // 0-11
+        const itemMonth = new Date(item.evaluation_date).getMonth() + 1; // ✅ ใช้ getMonth() +1 เพื่อให้ตรงกับ array
         return itemMonth.toString() === monthFilter;
       });
     }
+    
 
     setFilteredFeedbacks(filteredData);
   }, [sortOrder, feedbacks, monthFilter, selectedYear]);
@@ -187,6 +188,8 @@ const TherapyFeedback = () => {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+                <FontAwesome5 name="search" style={styles.searchIcon} />
+        
 
         {/* Sort & Month Picker Row */}
         <View style={styles.pickerRow}>
@@ -217,12 +220,13 @@ const TherapyFeedback = () => {
 
           {/* ปุ่มเลือกเดือน (แทน DropDownPicker เดิม) */}
           <View style={styles.dropdownContainer}>
-            <Text style={styles.monthLabel}>เดือนที่เลือก:</Text>
-            <TouchableOpacity style={styles.monthSelectButton} onPress={openMonthPicker}>
-              <Text style={styles.monthSelectButtonText}>
-                {monthFilter === "all" ? "ทุกเดือน" : monthNames[Number(monthFilter)]}
-              </Text>
-            </TouchableOpacity>
+            <Text style={styles.monthLabel}>เดือน :</Text>
+            <TouchableOpacity style={styles.monthSelectButton} onPress={() => setMonthPickerVisible(true)}>
+  <Text style={styles.monthSelectButtonText}>
+    {monthFilter === "all" ? "ทุกเดือน" : monthNames[Number(monthFilter)]}
+  </Text>
+</TouchableOpacity>
+
             
           </View>
           
@@ -294,12 +298,12 @@ const TherapyFeedback = () => {
             <View style={styles.modalHeader}>
 
               <TouchableOpacity onPress={decrementYear}>
-                <FontAwesome5 name="chevron-left" size={18} color="#333" />
+                <FontAwesome5 name="chevron-left" size={18} color="#87CEFA" />
               </TouchableOpacity>
 
               <Text style={styles.modalYearText}>{selectedYear}</Text>
               <TouchableOpacity onPress={incrementYear}>
-                <FontAwesome5 name="chevron-right" size={18} color="#333" />
+                <FontAwesome5 name="chevron-right" size={18} color="#87CEFA" />
               </TouchableOpacity>
             </View>
 
@@ -341,72 +345,75 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: { paddingBottom: 20 },
   searchInput: {
-    height: 40,
+    backgroundColor: '#F0F0F0',
     borderWidth: 1,
-    borderColor: "#87CEFA",
+    borderColor: '#EAEAEA',
     borderRadius: 10,
-    paddingHorizontal: 10,
-    marginHorizontal: 20,
-    marginVertical: 20,
+    padding: 10,
+    margin: 18,
+    textAlign: 'left', // ให้ placeholder และข้อความใน TextInput อยู่ทางขวา,
+    paddingLeft:30
+
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 30,
+    top: 90,
+    color:"#565656"
+  
   },
   pickerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginHorizontal: 20,
-    zIndex: 10,
+    marginHorizontal: 5,
   },
-  dropdownContainer: { width: "48%", zIndex: 1000 },
+  dropdownContainer: {
+    flex: 1, // ✅ ทำให้ตัวกรองมีขนาดเท่ากัน
+    marginHorizontal: 10, // ✅ เพิ่มระยะห่างเล็กน้อยระหว่าง dropdowns
+  },
   dropdown: {
-    backgroundColor: "#C2E8FF",
-    borderRadius: 10,
+    backgroundColor: "white",
+    borderRadius: 7,
     borderWidth: 1,
     borderColor: "#87CEFA",
-    paddingHorizontal: 10,
-    height: 40,
-    width:180
-
+    paddingHorizontal: 5,
+    height: 42, // ✅ กำหนดความสูงให้แน่นอน (เช่นเดียวกับปุ่มเลือกเดือน)
+    width: "100%",
   },
   dropdownMenu: {
     backgroundColor: "white",
-    borderRadius: 10,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: "#87CEFA",
-    width:180
+    width: "100%", // ✅ ปรับให้ขนาดเท่ากัน
 
   },
-  monthDropdownMenu: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#87CEFA",
-    maxHeight: 600,
-    zIndex: 2000,
-    elevation: 20,
-  },
+ 
   /* สไตล์สำหรับปุ่มเลือกเดือน (แทน DropDownPicker) */
   monthLabel: {
     fontFamily: "Kanit",
     fontSize: 14,
     color: "#333",
-    marginBottom: 5,
+    margin:5
   },
   monthSelectButton: {
-    backgroundColor: "#white",
-    borderRadius: 10,
-    paddingVertical: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
+    height: 40, // ✅ ปรับความสูงให้เท่ากับ DropDownPicker
+    justifyContent: "center", // ✅ จัดให้อยู่ตรงกลาง
     alignItems: "center",
-    width:100,
     borderWidth: 1,
     borderColor: "#87CEFA",
-    
-    
+    width: "60%", 
   },
   monthSelectButtonText: {
     fontFamily: "Kanit",
     fontSize: 16,
     color: "#333",
   },
+
+
   /* สไตล์สำหรับ Feedback Card */
   card: {
     marginTop: 30,
@@ -449,14 +456,15 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     textAlign: "center",
-    marginTop: 100,
+    marginTop: 200,
     fontSize: 20,
     fontFamily: "Kanit",
   },
+  
   /* สไตล์ Modal สำหรับเลือกเดือน */
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(167, 171, 171, 0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -487,7 +495,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     backgroundColor: "#C2E8FF",
-    borderRadius: 8,
+    borderRadius: 5,
     alignItems: "center",
     marginBottom: 10,
   },
@@ -500,7 +508,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignSelf: "center",
     backgroundColor: "#87CEFA",
-    borderRadius: 10,
+    borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
   },
@@ -509,24 +517,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "white",
   },
-  /* สำหรับ Sort Section */
-  sortContainer: {
-    marginHorizontal: 20,
-    marginBottom: 10,
-  },
-  resetButton: {
-    backgroundColor: "#FF6347",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  resetButtonText: {
-    fontSize: 14,
-    fontFamily: "Kanit",
-    color: "white",
-  },
+
+  
+  
   
 });
 

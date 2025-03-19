@@ -23,7 +23,7 @@ const { width, height } = Dimensions.get("window");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const StepDetailScreen = ({ navigation, route }) => {
-  const btn = ["วิดีโอ", "รูปภาพ"];
+  const btn = ["รูปภาพ", "วีดีโอ"];
   const videoRef = useRef(null);
   const [missionDetail, setMissionDetail] = useState({});
   const [subMissionLength, setSubMissionLength] = useState(0);
@@ -163,11 +163,8 @@ const StepDetailScreen = ({ navigation, route }) => {
   };
 
   return (
-    <LinearGradient colors={["#FFFFFF", "#baefff"]} style={styles.gradient}>
-      <View style={{ marginBottom: 60 }}>
-        <View style={styles.containerHeader}>
-          <HeaderLogo />
-        </View>
+    <View style={styles.gradient}>
+      <View style={{ marginBottom: 0 }}> 
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
@@ -215,14 +212,14 @@ const StepDetailScreen = ({ navigation, route }) => {
                       styles.tabBtn,
                       {
                         backgroundColor:
-                          isSelected === idx ? "#64dafc" : "white",
+                          isSelected === idx ? "#66C4FF" : "white",
                       },
                     ]}
                   >
                     <Text
                       style={{
                         textAlign: "center",
-                        color: isSelected === idx ? "white" : "black",
+                        color: isSelected === idx ? "white" : "#66C4FF",
                       }}
                     >
                       {value}
@@ -231,8 +228,8 @@ const StepDetailScreen = ({ navigation, route }) => {
                 ))}
               </View>
 
-              <View style={{ marginTop: 30 }}>
-                {isSelected === 0 ? (
+              <View style={{ marginTop: 20 }}>
+                {isSelected === 1 ? (
                   <Video
                     ref={videoRef}
                     style={styles.video}
@@ -247,7 +244,7 @@ const StepDetailScreen = ({ navigation, route }) => {
                   />
                 ) : (
                   <TouchableOpacity
-                    onPress={() => setImageModalVisible(true)}
+                    onPress={() => setImageModalVisible(true)} 
                   >
                     <Image
                       style={[styles.img]}
@@ -259,6 +256,8 @@ const StepDetailScreen = ({ navigation, route }) => {
                           : "",
                       }}
                     />
+                      <Text style={styles.imageDescription}>กดที่รูปเพื่อขยาย</Text>
+
                   </TouchableOpacity>
                 )}
               </View>
@@ -267,7 +266,7 @@ const StepDetailScreen = ({ navigation, route }) => {
         )}
 
         <View
-          style={{ marginTop: 60, marginRight: 20, alignItems: "flex-end" }}
+          style={{ marginTop: 30, marginRight: 25, alignItems: "flex-end" }}
         >
           <TouchableOpacity
             style={styles.nextButton}
@@ -275,7 +274,7 @@ const StepDetailScreen = ({ navigation, route }) => {
           >
             <View></View>
             <Text style={styles.nextButtonText}>ต่อไป</Text>
-            <FontAwesome5 name="chevron-right" color="#0096bd" size={18} />
+            <FontAwesome5 name="chevron-right" color="white" size={16} />
           </TouchableOpacity>
         </View>
       </View>
@@ -304,7 +303,7 @@ const StepDetailScreen = ({ navigation, route }) => {
             style={styles.closeButton}
             onPress={() => setImageModalVisible(false)}
           >
-            <FontAwesome5 name="times" size={24} color="#fff" />
+            <FontAwesome5 name="times" size={18} color="#87CEFA" />
           </TouchableOpacity>
           <Image
             style={styles.expandedImage}
@@ -316,30 +315,33 @@ const StepDetailScreen = ({ navigation, route }) => {
           />
         </View>
       </Modal>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
+    backgroundColor:"white"
   },
   containerHeader: {
     marginTop: Platform.OS === "ios" ? 60 : 30,
     alignItems: "center",
   },
   container: {
-    paddingVertical: 10,
+    paddingVertical: 8,
     alignItems: "center",
   },
   backButton: {
-    marginLeft: 10,
+    marginLeft: 30,
   },
   tabBtn: {
     width: 80,
     padding: 10,
     marginLeft: 10,
     borderRadius: 7,
+    borderColor:"#87CEFA",
+    borderWidth:1
   },
   stepNumber: {
     fontSize: 16,
@@ -353,23 +355,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   img: {
-    width: width * 0.8,
-    height: height * 0.4,
-    borderRadius: 10,
-    alignSelf: "center",
-  },
+  width: "100%", // ให้รูปภาพเต็มความกว้างของคอนเทนเนอร์
+  height: undefined, // ให้คำนวณอัตราส่วนอัตโนมัติ
+  aspectRatio: 1, // หรือ aspectRatio คำนวณจากขนาดภาพจริง
+  borderRadius: 10,
+  alignSelf: "center",
+  resizeMode: "contain", // ให้ภาพพอดีกับพื้นที่โดยไม่ถูกบีบ
+},
   nextButton: {
-    padding: 10,
-    borderRadius: 25,
-    width: 150,
-    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 24,
+    width: 100,
+    backgroundColor: "#66C4FF",    
     borderWidth: 1,
-    borderColor: "#0096bd",
+    borderColor: "white",
     flexDirection: "row",
     justifyContent: "space-between",
   },
   nextButtonText: {
-    color: "#0096bd",
+    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -396,6 +400,13 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     borderRadius: 10,
   },
+  imageDescription: {
+    marginTop: 8, // เว้นระยะห่างจากรูปภาพ
+    fontSize: 14,
+    color: "#555", // สีเทาอ่อนเพื่อให้อ่านง่าย
+    textAlign:"center"
+  },
+  
 });
 
 export default StepDetailScreen;

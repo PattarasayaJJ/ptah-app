@@ -63,12 +63,12 @@ const styles = StyleSheet.create({
     paddingBottom:100
   },
   searchInput: {
-    backgroundColor: '#EBEBEB',
+    backgroundColor: '#F0F0F0',
     borderWidth: 1,
     borderColor: '#EAEAEA',
     borderRadius: 10,
     padding: 10,
-    margin: 10,
+    margin: 15,
     textAlign: 'left', // ให้ placeholder และข้อความใน TextInput อยู่ทางขวา,
    paddingLeft:30
     

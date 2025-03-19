@@ -46,6 +46,7 @@ const Post = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollView}>
        <Text style={styles.heading}>สร้างกระทู้ </Text>
+       
         <View style={styles.innerContainer}>
           <View style={styles.inputWrapper}>
             <Text style={styles.label}>หัวข้อ</Text>
@@ -100,7 +101,6 @@ const Post = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1 ,
-    margin:0,
     justifyContent:"space-between",
     backgroundColor:"white"
   },
@@ -116,10 +116,15 @@ const styles = StyleSheet.create({
     marginTop: 0, 
   },
   heading: {
-    fontSize: 20,
+    fontSize: 24,
+    marginTop: 20,
     fontFamily: "Kanit",
-  
-   
+    marginLeft: 20,
+    borderLeftWidth: 3,
+    paddingLeft: 10,
+    borderColor: "#87CEFA",
+    color: "#333",
+    marginBottom: 5,
   },
   inputWrapper: {
     width: '100%',
@@ -158,20 +163,12 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     alignSelf: 'flex-start',
     paddingLeft: 10,
-    marginBottom: 0,
+    marginBottom: 10,
     marginTop: 10,
     color: '#555',
     fontFamily: "Kanit",
   },
-  heading: {
-    fontSize: 20,
-    marginTop: 20,
-    fontFamily: "Kanit",
-    marginLeft:20,
-    borderLeftWidth:1,
-    padding:10,
-    borderColor:"#87CEFA"
-  },
+  
 });
 
 export default Post;

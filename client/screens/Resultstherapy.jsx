@@ -11,6 +11,8 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard
 } from "react-native";
 import { AuthContext } from "../context/authContext";
 import moment from "moment";
@@ -163,76 +165,81 @@ const Resultstherapy = ({ navigation, route }) => {
       style={styles.gradient}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <Text style={styles.heading}>ผลการกายภาพบำบัด</Text>
-          <Text style={styles.date}>
-            วันที่ {moment().add(543, "year").format("D MMMM YYYY")}
-          </Text>
-        </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 
+
+      <FlatList
+        data={exerciseResults}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }} // ✅ เพิ่มพื้นที่เลื่อน
+        keyboardShouldPersistTaps="handled"
+
+        ListHeaderComponent={
+          <>
+            <View style={styles.header}>
+              <Text style={styles.heading}>ผลการกายภาพบำบัด</Text>
+              <Text style={styles.date}>
+                วันที่ {moment().add(543, "year").format("D MMMM YYYY")}
+              </Text>
+            </View>
+  
+        {/* 🔥 ครอบทุกอย่างใน Card */}
         <View style={styles.card}>
-          <Text style={styles.time}>
-            ระยะเวลาในการทำกายภาพ {formatTime(resultTime)} นาที
-          </Text>
-          <FlatList
-            data={exerciseResults}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => `exercise-${index}`}
-            style={styles.resultList}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            ListEmptyComponent={() => (
+            <Text style={styles.time}>
+              ระยะเวลาในการทำกายภาพ {formatTime(resultTime)} นาที
+            </Text>
+
+            {exerciseResults.length > 0 ? (
+              <FlatList
+                data={exerciseResults}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => `exercise-${index}`}
+                scrollEnabled={false} // ❗ ป้องกันการเลื่อนซ้อนกับ FlatList หลัก
+              />
+            ) : (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>
                   ท่านยังไม่ได้ประเมินผลกายภาพบำบัด
                 </Text>
-                <Image
-                  source={require("../img/emo.png")}
-                  style={styles.image}
-                />
+                <Image source={require("../img/emo.png")} style={styles.image} />
               </View>
             )}
-          />
-        </View>
-        
+          </View>
+        </>
+      }
+        ListFooterComponent={
+          answers.length > 0 && (
+            <>
+              <Text style={styles.label}>ข้อความถึงแพทย์:</Text>
+              <TextInput
+                style={styles.input}
+                value={doctorMessage}
+                onChangeText={(text) => setDoctorMessage(text)}
+                multiline
+              />
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSendAnswer}
+              >
+                <Text style={styles.submitButtonText}>
+                  {missionsToEvaluate.length === 0
+                    ? "ส่งแบบประเมิน"
+                    : "บันทึกประเมิน"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )
+        }
+      />
+            </TouchableWithoutFeedback>
 
-        {answers.length > 0 && (
-          <>
-            <Text style={styles.label}>ข้อความถึงแพทย์:</Text>
-            <TextInput
-              style={styles.input}
-              value={doctorMessage}
-              onChangeText={(text) => setDoctorMessage(text)}
-              multiline
-            />
-          </>
-        )}
-
-        {answers.length > 0 && (
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSendAnswer}
-          >
-            <Text style={styles.submitButtonText}>
-              {missionsToEvaluate.length === 0
-                ? "ส่งแบบประเมิน"
-                : "บันทึกประเมิน"}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        <StarModal
-          isVisible={isModalVisible}
-          onCloseSuccess={() => {
-            setModalVisible(false);
-            navigation.navigate("Step");
-          }}
-        />
-      </ScrollView>
+  
+      <StarModal
+        isVisible={isModalVisible}
+        onCloseSuccess={() => {
+          setModalVisible(false);
+          navigation.navigate("Step");
+        }}
+      />
     </KeyboardAvoidingView>
   );
 };

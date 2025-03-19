@@ -89,6 +89,7 @@ const ScreenMenu = () => {
             component={Allblog}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -100,6 +101,7 @@ const ScreenMenu = () => {
             component={Notification}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -111,6 +113,7 @@ const ScreenMenu = () => {
             component={Post}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -122,6 +125,7 @@ const ScreenMenu = () => {
             component={Myposts}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -132,6 +136,7 @@ const ScreenMenu = () => {
             component={EditPostScreen}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -143,6 +148,7 @@ const ScreenMenu = () => {
             component={Account}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -154,6 +160,7 @@ const ScreenMenu = () => {
             component={PostDetails}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -164,6 +171,7 @@ const ScreenMenu = () => {
             component={Therapy}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -174,6 +182,7 @@ const ScreenMenu = () => {
             component={StepScreen}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA",
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -195,6 +204,7 @@ const ScreenMenu = () => {
             component={TherapyFeedback}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -205,6 +215,7 @@ const ScreenMenu = () => {
             component={TherapyFeedbackDetail}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -216,6 +227,7 @@ const ScreenMenu = () => {
             component={Resultstherapy}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -227,6 +239,7 @@ const ScreenMenu = () => {
             component={LeaderboardScreen}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก
@@ -238,6 +251,7 @@ const ScreenMenu = () => {
             component={History}
             options={{
               headerBackTitle: "Back",
+              headerTintColor: "#87CEFA", 
               headerTitle: (props) => <HeaderLogo {...props} />,
               headerTitleAlign: "center",
               headerShadowVisible: false, // เอาเส้นใต้ Header ออก

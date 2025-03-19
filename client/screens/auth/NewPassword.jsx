@@ -19,11 +19,19 @@ const NewPassword = ({ navigation }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [notMatchModal, setNotMatchModal] = useState(false);
+  const [emptyFieldModal, setEmptyFieldModal] = useState(false); // ✅ เพิ่ม State สำหรับแจ้งเตือนเมื่อไม่ได้กรอกรหัสผ่าน
+  const [successModal, setSuccessModal] = useState(false); // ✅ เพิ่ม State สำหรับ Modal แจ้งเตือน
 
   const [loading, setLoading] = useState(false);
 
   // Function
   const handleSubmit = async () => {
+    // ✅ เช็คว่ามีการกรอกรหัสผ่านหรือไม่
+    if (!newPassword || !confirmPassword) {
+      setEmptyFieldModal(true);
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setNotMatchModal(true);
       return;
@@ -39,7 +47,8 @@ const NewPassword = ({ navigation }) => {
         email: email,
         password: confirmPassword,
       });
-      navigation.navigate("Signin");
+      setLoading(false);
+      setSuccessModal(true); // ✅ แสดง Modal แจ้งเตือนเมื่อสำเร็จ
     } catch (error) {
       alert(error.response?.data?.message || "เกิดข้อผิดพลาด");
       setLoading(false);
@@ -76,12 +85,35 @@ const NewPassword = ({ navigation }) => {
           <SubmitButton btnTitle="ยืนยัน" handleSubmit={handleSubmit} />
         </View>
       </ScrollView>
+
+      {/* ✅ Modal แจ้งเตือนเมื่อไม่ได้กรอกรหัสผ่าน */}
+      <CustomModal
+        isOpen={emptyFieldModal}
+        text="กรุณากรอกรหัสผ่านให้ครบ"
+        isCancel={false}
+        btnText="ปิด"
+        onConfirm={() => setEmptyFieldModal(false)}
+      />
+
+      {/* ✅ Modal แจ้งเตือนเมื่อรหัสผ่านไม่ตรงกัน */}
       <CustomModal
         isOpen={notMatchModal}
-        text="Password doesn't match"
+        text="รหัสผ่านไม่ตรงกัน"
         isCancel={false}
         btnText="ปิด"
         onConfirm={() => setNotMatchModal(false)}
+      />
+
+      {/* ✅ Modal แจ้งเตือนเมื่อเปลี่ยนรหัสผ่านเสร็จสิ้น */}
+      <CustomModal
+        isOpen={successModal}
+        text="เปลี่ยนรหัสผ่านเสร็จสิ้น!"
+        isCancel={false}
+        btnText="เข้าสู่ระบบ"
+        onConfirm={() => {
+          setSuccessModal(false);
+          navigation.navigate("Signin"); // ✅ ไปหน้าเข้าสู่ระบบ
+        }}
       />
     </View>
   );
@@ -94,21 +126,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: "space-between", // จัดวางให้อยู่ตรงกลาง
+    justifyContent: "space-between",
   },
   img: {
     width: 400,
     height: 80,
     marginTop: 130,
     alignSelf: "center",
-  },
-  linkText: {
-    textAlign: "center",
-    fontFamily: "Kanit",
-  },
-  link: {
-    color: "white",
-    fontFamily: "Kanit",
   },
   bginput: {
     backgroundColor: "#87CEFA",

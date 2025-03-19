@@ -26,7 +26,7 @@ const CustomModal = ({
                 style={[styles.button, styles.buttonClose]}
                 onPress={onCancel}
               >
-                <Text style={styles.textStyle}>ยกเลิก</Text>
+                <Text style={styles.textStyleNo}>ไม่ใช่</Text>
               </Pressable>
             )}
 
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 40,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -63,11 +63,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    width:300,
+    height:200
   },
   button: {
-    borderRadius: 20,
+    borderRadius: 15,
     padding: 10,
     elevation: 2,
+    margin:5,
+    width:80
   },
   buttonOpen: {
     backgroundColor: "#F194FF",
@@ -76,22 +80,32 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
   },
   buttonConfirm: {
-    backgroundColor: "#2196F3",
-  },
+      backgroundColor: "#87CEFA",  
+    },
   textStyle: {
     color: "white",
-    fontWeight: "bold",
     textAlign: "center",
+    fontFamily:"Kanit",
+
   },
   modalText: {
-    marginBottom: 15,
+    marginBottom: 25,
     textAlign: "center",
+    fontFamily:"Kanit",
+    fontSize:20
   },
   buttonGroup: {
     display: "flex",
-    gap: 8,
+    gap: 10,
     flexDirection: "row",
   },
+  textStyleNo:{
+    color: "white",
+    textAlign: "center",
+    fontFamily:"Kanit",
+
+
+  }
 });
 
 export default CustomModal;

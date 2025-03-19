@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     fontFamily: "Kanit",
   },
   currentUserName: {
-    color: "#68B6F3",
+    color: "#FFD700",
     fontWeight: "bold",
   },
 });

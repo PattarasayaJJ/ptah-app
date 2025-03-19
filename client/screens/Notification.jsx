@@ -166,9 +166,10 @@ const styles = StyleSheet.create({
   },
   titleDelete: (type) => ({
     fontSize: 16,
-    fontWeight: "bold",
     color: type === "have" ? "#0188dc" : "#BEBEBE",
     paddingBottom: 10,
+    fontFamily: "Kanit",
+
   }),
   viewFlatlist: {
     paddingHorizontal: 14,

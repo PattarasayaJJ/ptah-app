@@ -202,12 +202,12 @@ const confirmDeleteReply = (commentId, replyId) => {
                 <View style={styles.commentTextContainer}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={styles.commentInfo}>
-  ตอบกลับโดย : 
-  {comment.postedByUser?.name ||
-    (comment.postedByPersonnel
-      ? `${comment.postedByPersonnel.nametitle}${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
-      : 'ไม่ทราบชื่อ')}
-</Text>
+                     ตอบกลับโดย : 
+                    {comment.postedByUser?.name ||
+                      (comment.postedByPersonnel
+                        ? `${comment.postedByPersonnel.nametitle}${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
+                        : 'ไม่ทราบชื่อ')}
+                  </Text>
                     <Text style={styles.commentDate}>
                       {moment(comment.created).format('DD/MM/YYYY')}
                     </Text>
@@ -309,8 +309,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     paddingBottom: 7,
-    borderBottomWidth: 3,
-    borderColor:"lightgrey",
+    borderBottomWidth: 1,
+    borderColor:"#87CEFA",
     fontFamily: "Kanit",
     color: '#333',
 
@@ -335,7 +335,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 5,
     color: '#333',
-    marginTop: 10
+    marginTop: 10,
+    fontFamily: "Kanit",
+
   },
   commentsContainer: {
     marginVertical: 10,
@@ -362,6 +364,7 @@ const styles = StyleSheet.create({
   commentText: {
     fontFamily: "Kanit",
     color: "#333",
+    marginTop:10
   },
   commentInfo: {
     color: 'grey',
@@ -395,7 +398,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   replyText: {
-    fontFamily: "Kanit"
+    fontFamily: "Kanit",
+    marginTop:10
   },
   replyInfo: {
     color: 'grey',
@@ -428,7 +432,6 @@ const styles = StyleSheet.create({
   },
   commentButtonText: {
     color: 'white',
-    fontWeight: 'bold',
     fontFamily: "Kanit",
   },
   commentInputContainer: {

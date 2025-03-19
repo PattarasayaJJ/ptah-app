@@ -303,7 +303,7 @@ const checkUserIdController = async (req, res) => {
     });
 
     if (!users) {
-      return res.status(404).send({
+      return res.status(200).send({ // ✅ เปลี่ยนจาก 404 เป็น 200
         success: false,
         message: "ไม่พบเลขบัตรประชาชนนี้ในระบบ",
       });
@@ -334,8 +334,8 @@ const newPasswordController = async (req, res) => {
     });
 
     if (!users) {
-      return res.status(404).send({
-        success: false,
+      return res.status(200).send({ // ✅ เปลี่ยนจาก 404 เป็น 200
+        success: false, // ✅ success เป็น false เพื่อให้ frontend ตรวจจับได้
         message: "ไม่พบเลขบัตรประชาชนนี้ในระบบ",
       });
     }

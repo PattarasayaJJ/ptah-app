@@ -25,6 +25,10 @@ const ForgotPasswordCheckId = ({ navigation }) => {
 
   // Function
   const handleSubmit = async () => {
+    if (!ID_card_number) {
+            Alert.alert("กรุณากรอกข้อมูล");
+            return;
+          }
     try {
       await AsyncStorage.removeItem("email");
       await AsyncStorage.removeItem("idCardNumber");
@@ -35,6 +39,13 @@ const ForgotPasswordCheckId = ({ navigation }) => {
       const { data } = await axios.post("/auth/check-user-id", {
         idCardNumber: ID_card_number,
       });
+
+      if (!data.success) { // ✅ ตรวจจับ success: false จาก backend
+        Alert.alert("เลขบัตรประจำตัวประชาชนไม่ถูกต้อง", data.message);
+        setLoading(false);
+        return;
+      }
+  
 
       setEmail(data.data.email);
       setConfirmModal(true);
@@ -93,8 +104,12 @@ const ForgotPasswordCheckId = ({ navigation }) => {
       </ScrollView>
       <CustomModal
         isOpen={confirmModal}
-        text={`${email} ใช้อีเมลของคุณไหม`}
-        isCancel={true}
+        text={
+          <View>
+            <Text style={styles.emailText}>{email}</Text>
+            <Text style={styles.modalText}>นี่คืออีเมลของคุณใช่หรือไม่?</Text>
+          </View>
+        }        isCancel={true}
         btnText="ยืนยัน"
         onCancel={() => {
           setID_card_number("");
@@ -139,6 +154,22 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 75,
     marginTop: 74,
     flex: 1,
+  },
+  emailText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#87CEFA", // ✅ ปรับเป็นสีน้ำเงิน
+    textAlign: "center",
+    marginBottom: 5, // ✅ เพิ่มระยะห่าง
+    fontFamily: "Kanit",
+
+  },
+  modalText: {
+    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
+    fontFamily: "Kanit",
+
   },
 });
 

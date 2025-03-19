@@ -24,8 +24,8 @@ otpSchema.pre("save", async function (next) {
       this.email,
       "การรีเซ็ตรหัสผ่าน",
       "",
-      `<h1>Please confirm your OTP</h1>
-		<p>Here is your OTP code: ${this.otp}</p>`
+      `<h1>OTP สำหรับการเปลี่ยนรหัสผ่าน PTAH Aplication</h1>
+		<p>รหัส OTP ของท่าน คือ: ${this.otp}</p>`
     );
   }
   next();

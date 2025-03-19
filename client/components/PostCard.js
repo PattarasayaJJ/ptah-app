@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     paddingBottom: 7,
-    borderBottomWidth: 3,
-    borderColor:"lightgrey",
+    borderBottomWidth: 1.5,
+    borderColor:"#87CEFA",
     fontFamily: "Kanit",
     color: '#333',
   },
   content: {
-    color: '#333',
+    color: '#404040',
     marginTop: 10,
     marginBottom: 5,
     fontFamily: "Kanit",

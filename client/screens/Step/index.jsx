@@ -77,24 +77,24 @@ const StepScreen = ({ navigation }) => {
                   step.no === 1 ? styles.firstStepCard : null,
                 ]}
               >
+                
                 <View style={styles.stepHeader}>
-                  <Text style={styles.stepNumber}>{step.no}</Text>
-                  <Text style={styles.stepTitle}>{step.name}</Text>
-                </View>
-                {step.no !== 1 && (
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <Text style={styles.stepNumber}>{step.no}</Text>
+    <Text style={styles.stepTitle}>{step.name}</Text>
+  </View>
+  {step.no !== 1 && (
+    <Text
+      style={[
+        styles.progressText,
+        { color: step.isEvaluatedToday === 1 ? "#4caf50" : "#bdbdbd" },
+      ]}
+    >
+      {step.isEvaluatedToday === 1 ? "ทำแล้ว" : "ยังไม่ทำ"}
+    </Text>
+  )}
+</View>
 
-                <View style={styles.progressBarContainer}>
-                <Text
-                  style={[
-                    styles.progressText,
-                    { color: step.isEvaluatedToday === 1 ? "#4caf50" : "#bdbdbd" },
-                  ]}
-                >
-                  {step.isEvaluatedToday === 1 ? "ทำแล้ว" : "ยังไม่ทำ"}
-                </Text>
-              </View>
-              
-                )}
                 
               </TouchableOpacity>
             ))}
@@ -153,8 +153,10 @@ const styles = StyleSheet.create({
   stepHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between", // ทำให้ ProgressBar อยู่ฝั่งขวา
     marginBottom: 10,
   },
+  
   stepNumber: {
     fontSize: 30,
     fontWeight: "bold",

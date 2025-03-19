@@ -24,7 +24,7 @@ const Account = () => {
             <View style={styles.rowContainer}>
                
                 <View style={styles.textContainer}>
-                    <Text style={styles.username}> {authState?.user.name}  {authState?.user.surname}  {(authState.user?.stars|| 0) + 1 } ⭐</Text>
+                    <Text style={styles.username}> {authState?.user.name}  {authState?.user.surname} </Text>
                     <Text style={styles.idcard}> เบอร์โทรศัพท์ : {authState?.user.tel} </Text>
                     <Text style={styles.idcard}> รหัสบัตรประจำตัวประชาชน :  {authState?.user.ID_card_number}</Text>
                     <Text style={styles.idcard}> Email : {authState?.user.email}</Text>
@@ -35,27 +35,9 @@ const Account = () => {
             <View style={styles.information}>
 
             <View style={styles.infoHeader}>
-        <Text style={styles.infoHeaderText}>การตั้งค่า</Text>
        
     </View>
-                <TouchableOpacity>
-                    <View style={styles.menuItem}>
-                        <FontAwesome5 name="user-edit" color="#87CEFA" size={20}  style={styles.icon}/>
-                        <Text style={styles.menuItemTextsignout}>แก้ไขข้อมูลส่วนตัว</Text>
-                        <FontAwesome5 name="angle-right" color="#87CEFA" size={20}  style={styles.right}/>
-
-
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity >
-                    <View style={styles.menuItem}>
-                        <MaterialIcons name="help" color="#87CEFA" size={20}  style={styles.icon}/>
-                        <Text style={styles.menuItemTextsignout}>ความช่วยเหลือ</Text>
-                        <FontAwesome5 name="angle-right" color="#87CEFA" size={20}  style={styles.right}/>
-
-                    </View>
-                </TouchableOpacity>
+               
 
                 <TouchableOpacity onPress={handleLogout}>
                     <View style={styles.menuItem}>
@@ -103,10 +85,9 @@ const styles = StyleSheet.create({
     },
    
     username: {
-        fontSize: 15,
+        fontSize: 20,
         color: "black",
         fontFamily:"Kanit",
-        fontWeight:"bold"
         
     },
     idcard: {

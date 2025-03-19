@@ -113,7 +113,7 @@ const History = () => {
           hideExtraDays={true}
           style={styles.calendar} // 🔹 กำหนดพื้นหลังของปฏิทิน
           renderHeader={(date) => {
-            // 🔹 เปลี่ยนปี ค.ศ. เป็น พ.ศ. (บวก 543)
+            // เปลี่ยนปี ค.ศ. เป็น พ.ศ. (บวก 543)
             const year = date.getFullYear() + 543;
             const month = LocaleConfig.locales["th"].monthNames[date.getMonth()];
             return (
