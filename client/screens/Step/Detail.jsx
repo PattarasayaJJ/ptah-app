@@ -10,13 +10,12 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Video } from "expo-av";
 import axios from "axios";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import EvaluationModal from "../../components/EvaluationModal";
 import SuccessModal from "../../components/SuccessModal";
-import HeaderLogo from "../HeaderLogo";
+import { Alert } from "react-native";  // ✅ นำเข้า Alert จาก react-native
 
 const { width, height } = Dimensions.get("window");
 
@@ -162,15 +161,37 @@ const StepDetailScreen = ({ navigation, route }) => {
     )}:${String(secs).padStart(2, "0")}`;
   };
 
+  const handleGoBack = () => {
+    if (isRunning && !route.params.isEvaluatedToday) {
+    Alert.alert(
+      "แจ้งเตือน",
+      "หากออกจากด่าน เวลาจะเริ่มนับใหม่ คุณแน่ใจหรือไม่?",
+      [
+        {
+          text: "ยกเลิก",
+          style: "cancel",
+        },
+        {
+          text: "ออก",
+          onPress: () => navigation.goBack(),
+        },
+      ]
+    );
+  } else {
+    navigation.goBack();
+  }
+};
+
   return (
     <View style={styles.gradient}>
       <View style={{ marginBottom: 0 }}> 
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
-        </TouchableOpacity>
+      <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+  <FontAwesome5 name="chevron-left" color="#6bdbfc" size={18} />
+</TouchableOpacity>
+
+
+
+        
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#0096bd" />

@@ -70,13 +70,22 @@ const StepScreen = ({ navigation }) => {
           {steps?.length > 0 &&
             steps.map((step) => (
               <TouchableOpacity
-                key={step._id}
-                onPress={() => toggleModal(step)}
-                style={[
-                  styles.stepCard,
-                  step.no === 1 ? styles.firstStepCard : null,
-                ]}
-              >
+              key={step._id}
+              onPress={() => toggleModal(step)}
+              disabled={
+                step.no >= 3 && // เริ่มล็อกตั้งแต่ด่านที่ 3 เป็นต้นไป
+                !steps.find((s) => s.no === step.no - 1)?.isEvaluatedToday // ถ้าด่านก่อนหน้าไม่ได้ทำ
+              }
+              style={[
+                styles.stepCard,
+                step.no === 1 ? styles.firstStepCard : null,
+                step.no >= 3 && // ทำให้ด่านที่ล็อกอยู่ดูจางลง (เฉพาะด่านที่ 3 ขึ้นไป)
+                !steps.find((s) => s.no === step.no - 1)?.isEvaluatedToday
+                  ? { opacity: 0.5 }
+                  : {},
+              ]}
+            >
+            
                 
                 <View style={styles.stepHeader}>
   <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -150,13 +159,13 @@ const styles = StyleSheet.create({
 
     
   },
-  stepHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between", // ทำให้ ProgressBar อยู่ฝั่งขวา
-    marginBottom: 10,
-  },
-  
+ stepHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between", // ทำให้ ProgressBar อยู่ฝั่งขวา
+  marginBottom: 10,
+},
+
   stepNumber: {
     fontSize: 30,
     fontWeight: "bold",

@@ -208,11 +208,16 @@ const confirmDeleteReply = (commentId, replyId) => {
                         ? `${comment.postedByPersonnel.nametitle}${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
                         : 'ไม่ทราบชื่อ')}
                   </Text>
-                    <Text style={styles.commentDate}>
-                      {moment(comment.created).format('DD/MM/YYYY')}
-                    </Text>
+                   
                   </View>
+
                   <Text style={styles.commentText}>{comment.text}</Text>
+                  <Text style={styles.commentTime}>
+  {moment(comment.created).format('DD/MM/YYYY HH:mm:ss')}
+</Text>
+
+
+                  
                   {(comment.postedByUser?._id === userId || comment.postedByPersonnel?._id === userId) && (
                     <TouchableOpacity
                       onPress={() => confirmDeleteComment(comment._id)}
@@ -239,11 +244,12 @@ const confirmDeleteReply = (commentId, replyId) => {
       ? `${reply.postedByPersonnel.nametitle} ${reply.postedByPersonnel.name} ${reply.postedByPersonnel.surname}`
       : 'ไม่ทราบชื่อ')}
 </Text>
-                              <Text style={styles.commentDate}>
-                                {moment(reply.created).format('DD/MM/YYYY')}
-                              </Text>
+                              
                             </View>
                             <Text style={styles.replyText}>{reply.text}</Text>
+                            <Text style={styles.commentTime}>
+  {moment(reply.created).format('DD/MM/YYYY HH:mm:ss')}
+</Text>
                             {(reply.postedByUser?._id === userId || reply.postedByPersonnel?._id === userId) && (
                               <TouchableOpacity
                                 onPress={() =>  confirmDeleteReply(comment._id, reply._id)}
@@ -352,12 +358,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  avatar: {
-    width: 45,
-    height: 45,
-    borderRadius: 25,
-    marginRight: 10,
-  },
+
   commentTextContainer: {
     flex: 1,
   },
@@ -399,7 +400,8 @@ const styles = StyleSheet.create({
   },
   replyText: {
     fontFamily: "Kanit",
-    marginTop:10
+    marginTop:10,
+    marginBottom:5
   },
   replyInfo: {
     color: 'grey',
@@ -448,6 +450,13 @@ const styles = StyleSheet.create({
     color: 'red',
     fontFamily: "Kanit",
   },
+  commentTime: {
+    color: 'grey',
+    fontSize: 12,
+    fontFamily: "Kanit",
+    marginTop: 3,
+  },
+  
 });
 
 export default PostDetails;

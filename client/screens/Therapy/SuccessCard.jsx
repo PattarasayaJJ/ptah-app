@@ -17,12 +17,7 @@ const SuccessCardScreen = ({ navigation }) => {
       <View style={styles.card}>
         <View style={styles.headerCard}>
           <View />
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <FontAwesome5 name="times" light color="#6bdbfc" size={18} />
-          </TouchableOpacity>
+          
         </View>
         <Image
           source={require("../../img/question/popup.png")} // Replace with your image URL or local asset
